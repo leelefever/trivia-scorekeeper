@@ -141,6 +141,18 @@
       <span class="saved-flash" id="setup-flash">Saved</span>
     </div>
   </div>
+
+  <div style="border-top:1px solid var(--border);padding-top:1rem;margin-top:1rem;">
+    <h3 style="margin-bottom:0.5rem;">Google Sheets logging</h3>
+    <p class="muted" style="font-size:13px;margin-bottom:8px;">Paste your Apps Script web app URL to enable automatic logging.</p>
+    <div class="row">
+      <input type="text" id="sheets-url" placeholder="https://script.google.com/macros/s/…" style="flex:1;font-size:13px;" />
+      <button class="btn btn-sm" onclick="saveSheetUrl()">Save</button>
+    </div>
+    <p class="saved-flash mt" id="url-flash">URL saved ✓</p>
+    <p class="warn" id="url-warn"></p>
+    <div id="sheets-status" style="margin-top:8px;font-size:12px;font-family:'Courier New',monospace;color:var(--text3);"></div>
+  </div>
 </div>
 
 <!-- SCORES -->
@@ -195,7 +207,7 @@ let S = load();
 
 function load() {
   try { const r = localStorage.getItem(KEY); if (r) return JSON.parse(r); } catch(e) {}
-  return { teams:[], rounds:{}, currentRound:1, started:false, gameName:'', sessions:[] };
+  return { teams:[], rounds:{}, currentRound:1, started:false, gameName:'', sessions:[], sheetUrl:'' };
 }
 function save() {
   try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {}
@@ -239,7 +251,56 @@ function renderSetup() {
   if (S.started) { sb.textContent = 'Game in progress'; sb.disabled = true; sb.style.opacity='0.5'; }
   else { sb.textContent = 'Start game'; sb.disabled = false; sb.style.opacity='1'; }
   document.getElementById('new-name').disabled = S.started;
+  const urlEl = document.getElementById('sheets-url');
+  if (urlEl) urlEl.value = S.sheetUrl || '';
+  updateSheetsStatus();
   updateStatus();
+}
+function saveSheetUrl() {
+  const val = document.getElementById('sheets-url').value.trim();
+  if (val && !val.startsWith('https://script.google.com')) {
+    document.getElementById('url-warn').textContent = 'URL should start with https://script.google.com';
+    return;
+  }
+  document.getElementById('url-warn').textContent = '';
+  S.sheetUrl = val;
+  save(); flash('url-flash'); updateSheetsStatus();
+}
+function updateSheetsStatus() {
+  const el = document.getElementById('sheets-status');
+  if (!el) return;
+  el.textContent = S.sheetUrl ? 'Logging enabled ✓' : 'No URL set — logging disabled';
+  el.style.color = S.sheetUrl ? 'var(--green)' : 'var(--text3)';
+}
+async function logRoundToSheet(roundNum) {
+  if (!S.sheetUrl) return;
+  const date = new Date().toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'});
+  const scores = S.teams.map(t => ({ team: t, points: S.rounds[roundNum][t] || 0 }));
+  try {
+    await fetch(S.sheetUrl, {
+      method: 'POST', mode: 'no-cors',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ type:'round', date, gameName: S.gameName, round: roundNum, scores })
+    });
+  } catch(e) { console.warn('Sheet log failed:', e); }
+}
+async function logSummaryToSheet() {
+  if (!S.sheetUrl) return;
+  const date = new Date().toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'});
+  const totals = getTotals();
+  const sorted = S.teams.slice().sort((a,b) => totals[b]-totals[a]);
+  let rank = 1;
+  const results = sorted.map((t,i) => {
+    if (i > 0 && totals[t] < totals[sorted[i-1]]) rank = i+1;
+    return { rank, team: t, total: totals[t] };
+  });
+  try {
+    await fetch(S.sheetUrl, {
+      method: 'POST', mode: 'no-cors',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ type:'summary', date, gameName: S.gameName, roundsPlayed: Object.keys(S.rounds).length, results })
+    });
+  } catch(e) { console.warn('Sheet summary log failed:', e); }
 }
 function addTeam() {
   if (S.started) return;
@@ -267,6 +328,7 @@ function startGame() {
 function resetAll() {
   if (!confirm('Archive current game and start fresh?')) return;
   if (S.started && Object.keys(S.rounds).length > 0) {
+    logSummaryToSheet();
     S.sessions = S.sessions || [];
     S.sessions.push({ name: S.gameName, date: new Date().toISOString(), teams: S.teams.slice(), rounds: JSON.parse(JSON.stringify(S.rounds)) });
   }
@@ -314,6 +376,7 @@ function saveRound() {
   if (!allFilled) { document.getElementById('score-warn').textContent = 'Fill in all scores before saving.'; return; }
   document.getElementById('score-warn').textContent = '';
   save(); flash('score-flash');
+  logRoundToSheet(r);
   const maxRound = Math.max(...Object.keys(S.rounds).map(Number));
   S.currentRound = maxRound + 1;
   save(); renderScores(); updateStatus();
