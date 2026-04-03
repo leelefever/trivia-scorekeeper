@@ -487,7 +487,8 @@ function startGameHome() {
   S.totalRounds = rounds;
   S.finished = false;
   S.gameName = new Date().toLocaleDateString('en-US', {month:'short', day:'numeric'});
-  save(); renderHome(); updateStatus();
+  save(); updateStatus();
+  goTo('scores', document.getElementById('nav-scores'));
 }
 function addTeamMidGame() {
   const input = document.getElementById('home-add-input');
