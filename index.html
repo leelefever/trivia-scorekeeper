@@ -356,6 +356,7 @@ function renderHome() {
   const sorted = S.teams.slice().sort((a,b) => totals[b]-totals[a]);
   const leader = sorted[0];
   const isFinalRound = S.totalRounds > 0 && S.currentRound === S.totalRounds;
+  const isGameComplete = S.totalRounds > 0 && rounds >= S.totalRounds;
 
   if (!S.started) {
     // Build inline team setup
@@ -407,16 +408,16 @@ function renderHome() {
             <div class="home-stat-label">Rounds played</div>
           </div>
         </div>
-        <div class="home-action primary" onclick="goTo('scores', document.getElementById('nav-scores'))">
+        ${isGameComplete ? '' : `<div class="home-action primary" onclick="goTo('scores', document.getElementById('nav-scores'))">
           <div class="home-action-icon">›</div>
           <div class="home-action-text">
             <div class="home-action-title">${isFinalRound ? 'Enter final round scores' : 'Enter round ' + S.currentRound + ' scores'}</div>
             <div class="home-action-sub">${isFinalRound ? 'Last round — then announce the winner' : rounds + ' of ' + S.totalRounds + ' rounds complete'}</div>
           </div>
           <div class="home-action-arrow">›</div>
-        </div>
+        </div>`}
 
-        ${rounds >= S.totalRounds ? `<div class="home-action" style="border-color:var(--green);background:var(--green-light);" onclick="showEndGame()">
+        ${isGameComplete ? `<div class="home-action" style="border-color:var(--green);background:var(--green-light);" onclick="showEndGame()">
           <div class="home-action-icon" style="background:var(--green);color:#fff;">&#10003;</div>
           <div class="home-action-text">
             <div class="home-action-title" style="color:var(--green);">End game &amp; announce winner</div>
@@ -427,28 +428,28 @@ function renderHome() {
 
         <hr class="divider" />
 
-        <div style="margin-bottom:10px;">
-          <p class="section-title" style="margin-bottom:10px;">Teams</p>
-          <div class="card" style="padding:0 1rem;">
-            ${teamListHtml}
-            <div class="row" style="padding:10px 0;">
-              <input type="text" id="home-add-input" placeholder="Add a team…" style="flex:1;font-size:14px;" onkeydown="if(event.key==='Enter')addTeamMidGame()" />
-              <button class="btn btn-sm" onclick="addTeamMidGame()">Add</button>
+        <div style="${isGameComplete ? 'display:none;' : ''}">
+          <div style="margin-bottom:10px;">
+            <p class="section-title" style="margin-bottom:10px;">Teams</p>
+            <div class="card" style="padding:0 1rem;">
+              ${teamListHtml}
+              <div class="row" style="padding:10px 0;">
+                <input type="text" id="home-add-input" placeholder="Add a team…" style="flex:1;font-size:14px;" onkeydown="if(event.key==='Enter')addTeamMidGame()" />
+                <button class="btn btn-sm" onclick="addTeamMidGame()">Add</button>
+              </div>
             </div>
+            <p class="warn" id="home-warn"></p>
           </div>
-          <p class="warn" id="home-warn"></p>
+          <div style="margin-bottom:10px;">
+            <p class="section-title" style="margin-bottom:10px;">Score log</p>
+            <div id="home-log-preview" class="card" style="padding:0 1rem;"></div>
+            <button class="btn btn-sm" onclick="goTo('log',null)" style="margin-top:8px;width:100%;">View full log &amp; export</button>
+          </div>
         </div>
-
-        <div style="margin-bottom:10px;">
-          <p class="section-title" style="margin-bottom:10px;">Score log</p>
-          <div id="home-log-preview" class="card" style="padding:0 1rem;"></div>
-          <button class="btn btn-sm" onclick="goTo('log',null)" style="margin-top:8px;width:100%;">View full log &amp; export</button>
-        </div>
-
         <div style="margin-top:1rem;text-align:center;">
           <button id="reset-game-btn" style="background:none;border:none;color:var(--text3);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;padding:4px 0;text-decoration:underline;text-underline-offset:3px;">Reset game</button>
         </div>
-      </div>`;
+      </div>\`;
 
     // Populate log preview
     const logEl = document.getElementById('home-log-preview');
