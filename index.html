@@ -192,6 +192,24 @@
 <!-- HOME -->
 <div id="screen-home" class="screen active">
   <div id="home-content"></div>
+  <div style="padding:0 1.25rem 2rem;">
+    <hr class="divider" style="margin:0 0 1rem;" />
+    <button onclick="toggleSheets()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;width:100%;">
+      <span id="sheets-arrow" style="font-size:11px;transition:transform 0.2s;">▶</span>
+      Google Sheets logging
+      <span id="sheets-status-dot" style="width:7px;height:7px;border-radius:50%;background:var(--border2);margin-left:4px;"></span>
+    </button>
+    <div id="sheets-panel" style="display:none;margin-top:12px;">
+      <p class="hint">Paste your Apps Script URL to log scores after each round and at end of game.</p>
+      <div class="row">
+        <input type="text" id="sheets-url" placeholder="https://script.google.com/macros/s/…" style="flex:1;font-size:14px;" />
+        <button class="btn btn-sm" onclick="saveSheetUrl()">Save</button>
+      </div>
+      <p class="saved-flash mt" id="url-flash">URL saved</p>
+      <p class="warn" id="url-warn"></p>
+      <p class="sheets-status off" id="sheets-status"></p>
+    </div>
+  </div>
 </div>
 
 <!-- SETUP -->
@@ -211,23 +229,6 @@
     <button onclick="resetAll()" style="background:none;border:none;color:var(--text3);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;padding:4px 0;text-decoration:underline;text-underline-offset:3px;">Reset game</button>
   </div>
 
-  <hr class="divider" />
-
-  <button onclick="toggleSheets()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;">
-    <span id="sheets-arrow" style="font-size:11px;transition:transform 0.2s;">▶</span>
-    Google Sheets logging
-    <span id="sheets-status-dot" style="width:7px;height:7px;border-radius:50%;background:var(--border2);margin-left:2px;"></span>
-  </button>
-  <div id="sheets-panel" style="display:none;margin-top:12px;">
-    <p class="hint">Paste your Apps Script URL to log scores automatically after each round and game.</p>
-    <div class="row">
-      <input type="text" id="sheets-url" placeholder="https://script.google.com/macros/s/…" style="flex:1;font-size:14px;" />
-      <button class="btn btn-sm" onclick="saveSheetUrl()">Save</button>
-    </div>
-    <p class="saved-flash mt" id="url-flash">URL saved</p>
-    <p class="warn" id="url-warn"></p>
-    <p class="sheets-status off" id="sheets-status"></p>
-  </div>
 </div>
 
 <!-- SCORES -->
