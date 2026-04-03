@@ -10,27 +10,27 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg: #f7f7f5;
-    --white: #ffffff;
-    --border: #e8e8e4;
-    --border2: #d4d4ce;
-    --text: #1a1a18;
-    --text2: #6b6b65;
-    --text3: #a8a8a2;
-    --accent: #2563eb;
-    --accent-light: #eff4ff;
-    --accent-text: #1d4ed8;
-    --gold: #d97706;
-    --gold-light: #fef3c7;
-    --green: #16a34a;
-    --green-light: #f0fdf4;
-    --red: #dc2626;
-    --red-light: #fef2f2;
-    --silver: #6b7280;
-    --bronze: #92400e;
+    --bg: #eef1f4;
+    --white: #f8fafb;
+    --border: #d6dde4;
+    --border2: #b8c5cf;
+    --text: #162030;
+    --text2: #4a5a6a;
+    --text3: #8a9aaa;
+    --accent: #2a5478;
+    --accent-light: #dde8f0;
+    --accent-text: #1e3d58;
+    --gold: #b07d2a;
+    --gold-light: #f5edda;
+    --green: #2a7a52;
+    --green-light: #e0f2ea;
+    --red: #b03030;
+    --red-light: #faeaea;
+    --silver: #6e9ab5;
+    --bronze: #7a5c2a;
     --radius: 14px;
     --radius-sm: 10px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow: 0 1px 3px rgba(22,32,48,0.07), 0 1px 2px rgba(22,32,48,0.05);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html { background: var(--bg); }
@@ -64,14 +64,14 @@
     font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.15s;
     box-shadow: var(--shadow);
   }
-  input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+  input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(42,84,120,0.12); }
   input[type="number"] { text-align: center; font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; }
   input::placeholder { color: var(--text3); }
 
   /* Buttons */
   .btn { cursor: pointer; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--white); color: var(--text); font-size: 15px; font-weight: 500; padding: 11px 18px; font-family: 'DM Sans', sans-serif; transition: all 0.15s; box-shadow: var(--shadow); }
   .btn:active { transform: scale(0.98); opacity: 0.85; }
-  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 8px rgba(37,99,235,0.25); }
+  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 8px rgba(42,84,120,0.25); }
   .btn-primary:active { background: var(--accent-text); }
   .btn-sm { padding: 8px 14px; font-size: 14px; }
   .btn-ghost { background: none; border-color: transparent; color: var(--text2); box-shadow: none; }
@@ -149,10 +149,10 @@
 </div>
 
 <nav class="nav">
-  <button class="nav-btn active" onclick="goTo('setup',this)">Setup</button>
   <button class="nav-btn" onclick="goTo('scores',this)">Scores</button>
   <button class="nav-btn" onclick="goTo('board',this)">Board</button>
   <button class="nav-btn" onclick="goTo('log',this)">Log</button>
+  <button class="nav-btn active" onclick="goTo('setup',this)">Setup</button>
 </nav>
 
 <!-- SETUP -->
@@ -167,23 +167,28 @@
 
   <button class="btn btn-primary" style="width:100%;padding:15px;font-size:16px;" onclick="startGame()" id="start-btn">Start game</button>
 
-  <div class="row mt">
-    <button class="btn btn-danger btn-sm" onclick="resetAll()">Reset &amp; archive</button>
-    <span class="spacer"></span>
+  <div class="row mt" style="justify-content:space-between;align-items:center;">
     <span class="saved-flash" id="setup-flash">Saved</span>
+    <button onclick="resetAll()" style="background:none;border:none;color:var(--text3);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;padding:4px 0;text-decoration:underline;text-underline-offset:3px;">Reset game</button>
   </div>
 
   <hr class="divider" />
 
-  <p class="section-title">Google Sheets logging</p>
-  <p class="hint">Paste your Apps Script URL to log scores automatically after each round and game.</p>
-  <div class="row">
-    <input type="text" id="sheets-url" placeholder="https://script.google.com/macros/s/…" style="flex:1;font-size:14px;" />
-    <button class="btn btn-sm" onclick="saveSheetUrl()">Save</button>
+  <button onclick="toggleSheets()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;">
+    <span id="sheets-arrow" style="font-size:11px;transition:transform 0.2s;">▶</span>
+    Google Sheets logging
+    <span id="sheets-status-dot" style="width:7px;height:7px;border-radius:50%;background:var(--border2);margin-left:2px;"></span>
+  </button>
+  <div id="sheets-panel" style="display:none;margin-top:12px;">
+    <p class="hint">Paste your Apps Script URL to log scores automatically after each round and game.</p>
+    <div class="row">
+      <input type="text" id="sheets-url" placeholder="https://script.google.com/macros/s/…" style="flex:1;font-size:14px;" />
+      <button class="btn btn-sm" onclick="saveSheetUrl()">Save</button>
+    </div>
+    <p class="saved-flash mt" id="url-flash">URL saved</p>
+    <p class="warn" id="url-warn"></p>
+    <p class="sheets-status off" id="sheets-status"></p>
   </div>
-  <p class="saved-flash mt" id="url-flash">URL saved</p>
-  <p class="warn" id="url-warn"></p>
-  <p class="sheets-status off" id="sheets-status"></p>
 </div>
 
 <!-- SCORES -->
@@ -328,9 +333,19 @@ function saveSheetUrl() {
 }
 function updateSheetsStatus() {
   const el = document.getElementById('sheets-status');
-  if (!el) return;
-  if (S.sheetUrl) { el.textContent = 'Logging enabled'; el.className = 'sheets-status on'; }
-  else { el.textContent = 'Logging disabled — no URL saved'; el.className = 'sheets-status off'; }
+  if (el) {
+    if (S.sheetUrl) { el.textContent = 'Logging enabled'; el.className = 'sheets-status on'; }
+    else { el.textContent = 'No URL saved'; el.className = 'sheets-status off'; }
+  }
+  const dot = document.getElementById('sheets-status-dot');
+  if (dot) dot.style.background = S.sheetUrl ? 'var(--green)' : 'var(--border2)';
+}
+function toggleSheets() {
+  const panel = document.getElementById('sheets-panel');
+  const arrow = document.getElementById('sheets-arrow');
+  const open = panel.style.display === 'none';
+  panel.style.display = open ? 'block' : 'none';
+  arrow.style.transform = open ? 'rotate(90deg)' : 'rotate(0deg)';
 }
 async function logRoundToSheet(roundNum) {
   if (!S.sheetUrl) return;
