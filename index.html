@@ -328,7 +328,7 @@ function showEndGame() {
     <div class="log-entry"><span>${winners.length+i+1}. ${t}</span><span class="log-pts">${totals[t]}</span></div>`).join('');
 
   overlay.innerHTML = `<div class="modal">
-    <p class="modal-title">${isTie ? 'It's a tie!' : 'Game over'}</p>
+    <p class="modal-title">${isTie ? 'It\'s a tie!' : 'Game over'}</p>
     <p class="modal-sub">${S.gameName} · ${S.totalRounds} rounds · ${S.teams.length} teams</p>
     ${winnerRows}
     ${runnerUps ? '<div class="card" style="padding:0 1rem;margin-top:10px;">'+runnerUps+'</div>' : ''}
