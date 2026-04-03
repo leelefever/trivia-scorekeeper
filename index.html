@@ -140,8 +140,8 @@
   .progress-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent), #3a7ab8); transition: width 0.4s ease; }
 
   /* End game modal */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(22,32,48,0.5); display: flex; align-items: flex-end; justify-content: center; z-index: 100; }
-  .modal { background: var(--white); border-radius: var(--radius) var(--radius) 0 0; padding: 1.5rem 1.25rem 2.5rem; width: 100%; max-width: 480px; box-shadow: 0 -4px 24px rgba(22,32,48,0.12); }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(22,32,48,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1.25rem; }
+  .modal { background: var(--white); border-radius: var(--radius); padding: 1.5rem 1.25rem 1.5rem; width: 100%; max-width: 440px; box-shadow: 0 8px 40px rgba(22,32,48,0.18); max-height: 90vh; overflow-y: auto; }
   .modal-title { font-size: 20px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
   .modal-sub { font-size: 14px; color: var(--text2); margin-bottom: 1.5rem; line-height: 1.5; }
   .winner-row { display: flex; align-items: center; gap: 12px; background: var(--gold-light); border: 1px solid #e8d8a8; border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; }
@@ -324,7 +324,7 @@ function showEndGame() {
       <span class="winner-pts">${totals[w]}</span>
     </div>`).join('');
 
-  const runnerUps = sorted.slice(winners.length, winners.length + 3).map((t,i) => `
+  const runnerUps = sorted.slice(winners.length).map((t,i) => `
     <div class="log-entry"><span>${winners.length+i+1}. ${t}</span><span class="log-pts">${totals[t]}</span></div>`).join('');
 
   overlay.innerHTML = `<div class="modal">
@@ -354,6 +354,7 @@ function renderHome() {
   const totals = getTotals();
   const sorted = S.teams.slice().sort((a,b) => totals[b]-totals[a]);
   const leader = sorted[0];
+  const isFinalRound = S.totalRounds > 0 && S.currentRound === S.totalRounds;
 
   if (!S.started) {
     // Build inline team setup
@@ -382,14 +383,7 @@ function renderHome() {
       </div>`;
   } else {
     // Game in progress
-    let leaderHtml = '';
-    if (leader && rounds > 0) {
-      leaderHtml = `<div class="home-leader">
-        <div class="home-leader-crown">&#9733;</div>
-        <div class="home-leader-name">${leader}</div>
-        <div class="home-leader-pts">${totals[leader]}</div>
-      </div>`;
-    }
+
 
     // Teams section (add during game)
     let teamListHtml = S.teams.map((t,i) => `
@@ -399,7 +393,7 @@ function renderHome() {
       <div class="home-state">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
           <p class="home-label" style="margin:0;">${S.gameName}</p>
-          <span style="font-size:12px;color:var(--text3);font-weight:500;">${rounds}/${S.totalRounds} rounds</span>
+          <span style="font-size:12px;color:var(--text3);font-weight:500;">${rounds} of ${S.totalRounds||'?'} rounds</span>
         </div>
         <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${S.totalRounds>0?Math.min(100,Math.round(rounds/S.totalRounds*100)):0}%;"></div></div>
         <div class="home-stat-row">
@@ -412,20 +406,11 @@ function renderHome() {
             <div class="home-stat-label">Rounds played</div>
           </div>
         </div>
-        ${leaderHtml}
         <div class="home-action primary" onclick="goTo('scores', document.getElementById('nav-scores'))">
           <div class="home-action-icon">›</div>
           <div class="home-action-text">
-            <div class="home-action-title">Enter round ${S.currentRound} scores</div>
-            <div class="home-action-sub">Tap to score the next round</div>
-          </div>
-          <div class="home-action-arrow">›</div>
-        </div>
-        <div class="home-action" onclick="goTo('board', document.getElementById('nav-board'))">
-          <div class="home-action-icon" style="background:var(--accent-light);color:var(--accent);">#</div>
-          <div class="home-action-text">
-            <div class="home-action-title">Leaderboard</div>
-            <div class="home-action-sub">${rounds > 0 ? sorted.map((t,i)=>(i+1)+'. '+t).slice(0,3).join(' · ') : 'No rounds yet'}</div>
+            <div class="home-action-title">${isFinalRound ? 'Enter final round scores' : 'Enter round ' + S.currentRound + ' scores'}</div>
+            <div class="home-action-sub">${isFinalRound ? 'Last round — then announce the winner' : rounds + ' of ' + S.totalRounds + ' rounds complete'}</div>
           </div>
           <div class="home-action-arrow">›</div>
         </div>
@@ -460,7 +445,7 @@ function renderHome() {
         </div>
 
         <div style="margin-top:1rem;text-align:center;">
-          <button onclick="resetAll()" style="background:none;border:none;color:var(--text3);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;padding:4px 0;text-decoration:underline;text-underline-offset:3px;">Reset game</button>
+          <button id="reset-game-btn" style="background:none;border:none;color:var(--text3);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;padding:4px 0;text-decoration:underline;text-underline-offset:3px;">Reset game</button>
         </div>
       </div>`;
 
@@ -694,9 +679,9 @@ function renderScores() {
   flash.textContent = 'Round saved ✓';
   wrap.appendChild(flash);
 
-  // Show end game button if final round has been saved
+  // Show end game button only on the final round after it has been saved
   const roundsSaved = Object.keys(S.rounds).length;
-  if (S.totalRounds > 0 && roundsSaved >= S.totalRounds) {
+  if (S.totalRounds > 0 && roundsSaved >= S.totalRounds && r === S.totalRounds) {
     const endDiv = document.createElement('div');
     endDiv.style = 'margin-top:1rem;';
     endDiv.innerHTML = `<div class="home-action" style="border-color:var(--green);background:var(--green-light);" onclick="showEndGame()">
