@@ -646,10 +646,16 @@ function renderScores() {
   const r = S.currentRound;
   const existing = S.rounds[r] || {};
   const isEdit = Object.keys(existing).length > 0;
+  const isFinal = S.totalRounds > 0 && r === S.totalRounds;
+  const isPastFinal = S.totalRounds > 0 && r > S.totalRounds;
 
   const header = document.createElement('div');
   header.className = 'row mb';
-  header.innerHTML = `<h2 style="margin:0;">Round ${r}</h2>
+  header.innerHTML = `
+    <div>
+      <h2 style="margin:0;">Round ${r}</h2>
+      ${isFinal ? '<span style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--green);margin-top:2px;display:block;">Final round</span>' : ''}
+    </div>
     <span class="spacer"></span>
     <button class="btn btn-icon btn-ghost" onclick="changeRound(-1)" id="prev-btn" ${r<=1?'disabled':''}>←</button>
     <button class="btn btn-icon btn-ghost" onclick="changeRound(1)">→</button>`;
@@ -675,7 +681,7 @@ function renderScores() {
   const saveBtn = document.createElement('button');
   saveBtn.className = 'btn btn-primary mt';
   saveBtn.style = 'width:100%;padding:15px;font-size:16px;';
-  saveBtn.textContent = 'Save round';
+  saveBtn.textContent = isFinal ? 'Save final round' : 'Save round';
   saveBtn.onclick = saveRound;
   wrap.appendChild(saveBtn);
 
@@ -687,6 +693,22 @@ function renderScores() {
   flash.className = 'saved-flash mt'; flash.id = 'score-flash';
   flash.textContent = 'Round saved ✓';
   wrap.appendChild(flash);
+
+  // Show end game button if final round has been saved
+  const roundsSaved = Object.keys(S.rounds).length;
+  if (S.totalRounds > 0 && roundsSaved >= S.totalRounds) {
+    const endDiv = document.createElement('div');
+    endDiv.style = 'margin-top:1rem;';
+    endDiv.innerHTML = `<div class="home-action" style="border-color:var(--green);background:var(--green-light);" onclick="showEndGame()">
+      <div class="home-action-icon" style="background:var(--green);color:#fff;">&#10003;</div>
+      <div class="home-action-text">
+        <div class="home-action-title" style="color:var(--green);">End game &amp; announce winner</div>
+        <div class="home-action-sub">All ${S.totalRounds} rounds complete</div>
+      </div>
+      <div class="home-action-arrow" style="color:var(--green);">›</div>
+    </div>`;
+    wrap.appendChild(endDiv);
+  }
 }
 function changeRound(dir) {
   if (dir===-1 && S.currentRound<=1) return;
