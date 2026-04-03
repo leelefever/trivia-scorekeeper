@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Trivia Score" />
+<title>Trivia Scorekeeper</title>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.15);
+    --text: #f0f0f0;
+    --text2: #888;
+    --text3: #555;
+    --accent: #f0c040;
+    --accent-dim: rgba(240,192,64,0.12);
+    --green: #4caf82;
+    --red: #e05555;
+    --blue: #5b9cf6;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Georgia', serif; }
+  body { display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; }
+
+  /* Header */
+  .header { padding: 1.25rem 1rem 0.75rem; border-bottom: 1px solid var(--border); }
+  .header h1 { font-size: 20px; font-weight: normal; letter-spacing: 0.04em; color: var(--accent); }
+  .header .subtitle { font-size: 12px; color: var(--text3); font-family: 'Courier New', monospace; margin-top: 2px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* Nav */
+  .nav { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--border); }
+  .nav-btn { padding: 0.75rem 0; font-size: 11px; font-family: 'Courier New', monospace; letter-spacing: 0.06em; text-transform: uppercase; background: none; border: none; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }
+  .nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* Screens */
+  .screen { display: none; flex: 1; overflow-y: auto; padding: 1rem; padding-bottom: 5rem; }
+  .screen.active { display: block; }
+
+  /* Typography */
+  h2 { font-size: 16px; font-weight: normal; letter-spacing: 0.05em; margin-bottom: 1rem; color: var(--text); }
+  h3 { font-size: 13px; font-family: 'Courier New', monospace; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text2); margin-bottom: 0.75rem; }
+
+  /* Inputs */
+  input[type="text"], input[type="number"] {
+    background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-sm);
+    color: var(--text); font-size: 15px; padding: 10px 12px; width: 100%;
+    font-family: inherit; outline: none; transition: border-color 0.15s;
+  }
+  input:focus { border-color: var(--accent); }
+  input[type="number"] { text-align: center; font-family: 'Courier New', monospace; font-size: 17px; }
+  input::placeholder { color: var(--text3); }
+
+  /* Buttons */
+  .btn { cursor: pointer; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: var(--surface); color: var(--text); font-size: 14px; padding: 10px 16px; font-family: inherit; transition: background 0.15s, border-color 0.15s; }
+  .btn:active { opacity: 0.7; }
+  .btn-primary { background: var(--accent); color: #0f0f0f; border-color: var(--accent); font-weight: bold; }
+  .btn-sm { padding: 6px 12px; font-size: 13px; }
+  .btn-ghost { background: none; border-color: transparent; color: var(--text2); }
+  .btn-danger { border-color: var(--red); color: var(--red); background: none; }
+  .btn-icon { width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 8px; }
+
+  /* Leaderboard */
+  .lb-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .lb-item:last-child { border-bottom: none; }
+  .rank-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Courier New', monospace; font-size: 13px; font-weight: bold; flex-shrink: 0; }
+  .r1 { background: var(--accent); color: #0f0f0f; }
+  .r2 { background: var(--surface2); color: #ccc; border: 1px solid #666; }
+  .r3 { background: var(--surface2); color: #b87333; border: 1px solid #b87333; }
+  .rn { background: var(--surface2); color: var(--text3); }
+  .lb-name { flex: 1; font-size: 15px; }
+  .lb-pts { font-size: 22px; font-family: 'Courier New', monospace; color: var(--accent); }
+  .tie-tag { font-size: 10px; font-family: 'Courier New', monospace; color: var(--blue); border: 1px solid var(--blue); border-radius: 4px; padding: 1px 5px; letter-spacing: 0.05em; margin-left: 6px; }
+  .round-pts { font-size: 11px; color: var(--text3); font-family: 'Courier New', monospace; }
+
+  /* Score entry */
+  .score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .score-row .team-name { flex: 1; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .score-row input { width: 72px; flex-shrink: 0; }
+
+  /* Team list */
+  .team-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .team-item .name { flex: 1; font-size: 15px; padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+
+  /* Log */
+  .log-round { margin-bottom: 1rem; }
+  .log-entry { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .log-entry:last-child { border-bottom: none; }
+
+  /* Misc */
+  .warn { color: #e08040; font-size: 13px; margin-top: 8px; font-family: 'Courier New', monospace; }
+  .muted { color: var(--text2); font-size: 14px; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .spacer { flex: 1; }
+  .mt { margin-top: 1rem; }
+  .mb { margin-bottom: 1rem; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block; margin-right: 6px; }
+  .saved-flash { color: var(--green); font-size: 13px; font-family: 'Courier New', monospace; opacity: 0; transition: opacity 0.3s; }
+  .saved-flash.show { opacity: 1; }
+  .section-label { font-size: 11px; font-family: 'Courier New', monospace; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Trivia Scorekeeper</h1>
+  <div class="subtitle"><span class="status-dot" id="status-dot"></span><span id="status-text">No game active</span></div>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="goTo('setup',this)">Setup</button>
+  <button class="nav-btn" onclick="goTo('scores',this)">Scores</button>
+  <button class="nav-btn" onclick="goTo('board',this)">Board</button>
+  <button class="nav-btn" onclick="goTo('log',this)">Log</button>
+</nav>
+
+<!-- SETUP -->
+<div id="screen-setup" class="screen active">
+  <h2>Teams</h2>
+  <div id="team-list" class="mb"></div>
+  <div class="row mb">
+    <input type="text" id="new-name" placeholder="Add team name…" onkeydown="if(event.key==='Enter')addTeam()" />
+    <button class="btn btn-sm" onclick="addTeam()">Add</button>
+  </div>
+  <p class="warn" id="setup-warn"></p>
+
+  <div style="border-top:1px solid var(--border);padding-top:1rem;margin-top:0.5rem;">
+    <button class="btn btn-primary" style="width:100%;padding:14px;" onclick="startGame()" id="start-btn">Start game</button>
+    <div class="mt row">
+      <button class="btn btn-danger btn-sm" onclick="resetAll()">Reset &amp; archive</button>
+      <span class="spacer"></span>
+      <span class="saved-flash" id="setup-flash">Saved</span>
+    </div>
+  </div>
+</div>
+
+<!-- SCORES -->
+<div id="screen-scores" class="screen">
+  <div class="row mb">
+    <h2 style="margin:0;">Round <span id="round-num">1</span></h2>
+    <span class="spacer"></span>
+    <button class="btn btn-icon btn-ghost" onclick="changeRound(-1)" id="prev-btn">←</button>
+    <button class="btn btn-icon btn-ghost" onclick="changeRound(1)">→</button>
+  </div>
+  <p class="muted mb" id="round-hint">Enter points earned this round</p>
+  <div id="score-entry"></div>
+  <button class="btn btn-primary mt" style="width:100%;padding:14px;" onclick="saveRound()">Save round</button>
+  <p class="warn" id="score-warn"></p>
+  <p class="saved-flash mt" id="score-flash">Round saved ✓</p>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="screen-board" class="screen">
+  <div class="row mb">
+    <h2 style="margin:0;">Leaderboard</h2>
+    <span class="spacer"></span>
+    <span class="muted" id="lb-meta" style="font-size:13px;font-family:'Courier New',monospace;"></span>
+  </div>
+  <div id="leaderboard"></div>
+</div>
+
+<!-- LOG -->
+<div id="screen-log" class="screen">
+  <h2>Score log</h2>
+  <div id="log-content"></div>
+  <div class="mt row">
+    <button class="btn btn-sm" onclick="exportCSV()">Export CSV</button>
+    <span class="spacer"></span>
+    <span class="muted" style="font-size:12px;" id="log-meta"></span>
+  </div>
+
+  <div style="border-top:1px solid var(--border);margin-top:1.5rem;padding-top:1rem;">
+    <h3>Past sessions</h3>
+    <div id="past-sessions"></div>
+  </div>
+</div>
+
+<script>
+const KEY = 'trivia_v2';
+let S = load();
+
+function load() {
+  try { const r = localStorage.getItem(KEY); if (r) return JSON.parse(r); } catch(e) {}
+  return { teams:[], rounds:{}, currentRound:1, started:false, gameName:'', sessions:[] };
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {}
+}
+function flash(id) {
+  const el = document.getElementById(id);
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 1800);
+}
+function updateStatus() {
+  const rounds = Object.keys(S.rounds).length;
+  document.getElementById('status-dot').style.background = S.started ? '#4caf82' : '#555';
+  document.getElementById('status-text').textContent = S.started
+    ? (S.gameName + ' · ' + rounds + ' round' + (rounds!==1?'s':'') + ' played')
+    : 'No game active';
+}
+
+function goTo(screen, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + screen).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (screen==='scores') renderScores();
+  if (screen==='board') renderBoard();
+  if (screen==='log') renderLog();
+  if (screen==='setup') renderSetup();
+}
+
+/* ---- SETUP ---- */
+function renderSetup() {
+  const list = document.getElementById('team-list');
+  list.innerHTML = '';
+  S.teams.forEach((t, i) => {
+    const d = document.createElement('div');
+    d.className = 'team-item';
+    d.innerHTML = `<span class="name">${t}</span>
+      ${!S.started ? `<button class="btn btn-icon btn-danger" onclick="removeTeam(${i})" style="font-size:16px;">×</button>` : ''}`;
+    list.appendChild(d);
+  });
+  const sb = document.getElementById('start-btn');
+  if (S.started) { sb.textContent = 'Game in progress'; sb.disabled = true; sb.style.opacity='0.5'; }
+  else { sb.textContent = 'Start game'; sb.disabled = false; sb.style.opacity='1'; }
+  document.getElementById('new-name').disabled = S.started;
+  updateStatus();
+}
+function addTeam() {
+  if (S.started) return;
+  const el = document.getElementById('new-name');
+  const name = el.value.trim();
+  if (!name) return;
+  if (S.teams.map(t=>t.toLowerCase()).includes(name.toLowerCase())) {
+    document.getElementById('setup-warn').textContent = 'That name is already taken.'; return;
+  }
+  S.teams.push(name); el.value = '';
+  document.getElementById('setup-warn').textContent = '';
+  save(); renderSetup(); flash('setup-flash');
+}
+function removeTeam(i) {
+  S.teams.splice(i,1); save(); renderSetup();
+}
+function startGame() {
+  if (S.teams.length < 2) { document.getElementById('setup-warn').textContent = 'Add at least 2 teams first.'; return; }
+  S.started = true;
+  const now = new Date();
+  S.gameName = now.toLocaleDateString('en-US', {month:'short',day:'numeric'});
+  save(); renderSetup();
+  document.getElementById('setup-warn').textContent = '';
+}
+function resetAll() {
+  if (!confirm('Archive current game and start fresh?')) return;
+  if (S.started && Object.keys(S.rounds).length > 0) {
+    S.sessions = S.sessions || [];
+    S.sessions.push({ name: S.gameName, date: new Date().toISOString(), teams: S.teams.slice(), rounds: JSON.parse(JSON.stringify(S.rounds)) });
+  }
+  S.teams=[]; S.rounds={}; S.currentRound=1; S.started=false; S.gameName='';
+  save(); renderSetup();
+}
+
+/* ---- SCORES ---- */
+function renderScores() {
+  const r = S.currentRound;
+  document.getElementById('round-num').textContent = r;
+  document.getElementById('prev-btn').disabled = r <= 1;
+  const existing = S.rounds[r] || {};
+  const isEdit = Object.keys(existing).length > 0;
+  document.getElementById('round-hint').textContent = isEdit ? 'Editing round ' + r + ' — changes update leaderboard' : 'Enter points earned this round';
+  const entry = document.getElementById('score-entry');
+  entry.innerHTML = '';
+  if (!S.started || !S.teams.length) {
+    entry.innerHTML = '<p class="muted">Set up and start a game first.</p>'; return;
+  }
+  S.teams.forEach(t => {
+    const val = existing[t] !== undefined ? existing[t] : '';
+    const row = document.createElement('div');
+    row.className = 'score-row';
+    const safeId = 'sc_' + t.replace(/[^a-z0-9]/gi,'_');
+    row.innerHTML = `<span class="team-name">${t}</span>
+      <input type="number" id="${safeId}" value="${val}" min="0" placeholder="0" inputmode="numeric" />`;
+    entry.appendChild(row);
+  });
+}
+function changeRound(dir) {
+  if (dir === -1 && S.currentRound <= 1) return;
+  S.currentRound += dir;
+  save(); renderScores();
+}
+function saveRound() {
+  const r = S.currentRound;
+  if (!S.rounds[r]) S.rounds[r] = {};
+  let allFilled = true;
+  S.teams.forEach(t => {
+    const el = document.getElementById('sc_' + t.replace(/[^a-z0-9]/gi,'_'));
+    if (!el || el.value.trim()==='') { allFilled = false; return; }
+    S.rounds[r][t] = parseFloat(el.value) || 0;
+  });
+  if (!allFilled) { document.getElementById('score-warn').textContent = 'Fill in all scores before saving.'; return; }
+  document.getElementById('score-warn').textContent = '';
+  save(); flash('score-flash');
+  const maxRound = Math.max(...Object.keys(S.rounds).map(Number));
+  S.currentRound = maxRound + 1;
+  save(); renderScores(); updateStatus();
+}
+
+/* ---- LEADERBOARD ---- */
+function getTotals() {
+  const totals = {};
+  S.teams.forEach(t => totals[t] = 0);
+  Object.values(S.rounds).forEach(rd => {
+    Object.entries(rd).forEach(([t,s]) => { if (totals[t]!==undefined) totals[t] += s; });
+  });
+  return totals;
+}
+function getRoundPts(team) {
+  const nums = Object.keys(S.rounds).map(Number).sort((a,b)=>a-b);
+  return nums.map(r => S.rounds[r][team] !== undefined ? S.rounds[r][team] : '-').join(' · ');
+}
+function renderBoard() {
+  const totals = getTotals();
+  const rounds = Object.keys(S.rounds).length;
+  document.getElementById('lb-meta').textContent = rounds + ' round' + (rounds!==1?'s':'');
+  const sorted = S.teams.slice().sort((a,b) => totals[b]-totals[a]);
+  const lb = document.getElementById('leaderboard');
+  lb.innerHTML = '';
+  if (!sorted.length) { lb.innerHTML = '<p class="muted">No teams yet.</p>'; return; }
+  let rank = 1;
+  sorted.forEach((t,i) => {
+    if (i > 0 && totals[t] < totals[sorted[i-1]]) rank = i+1;
+    const tied = sorted.filter(x => totals[x]===totals[t]).length > 1;
+    const cls = rank===1?'r1':rank===2?'r2':rank===3?'r3':'rn';
+    const item = document.createElement('div');
+    item.className = 'lb-item';
+    item.innerHTML = `<div class="rank-circle ${cls}">${rank}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="lb-name">${t}${tied?'<span class="tie-tag">TIE</span>':''}</div>
+        ${rounds > 0 ? `<div class="round-pts">${getRoundPts(t)}</div>` : ''}
+      </div>
+      <div class="lb-pts">${totals[t]}</div>`;
+    lb.appendChild(item);
+  });
+}
+
+/* ---- LOG ---- */
+function renderLog() {
+  const nums = Object.keys(S.rounds).map(Number).sort((a,b)=>a-b);
+  const log = document.getElementById('log-content');
+  log.innerHTML = '';
+  if (!nums.length) { log.innerHTML = '<p class="muted">No rounds saved yet.</p>'; }
+  else {
+    nums.forEach(r => {
+      const div = document.createElement('div');
+      div.className = 'log-round';
+      div.innerHTML = `<h3>Round ${r}</h3>`;
+      const sorted = Object.entries(S.rounds[r]).sort((a,b)=>b[1]-a[1]);
+      sorted.forEach(([t,s]) => {
+        const row = document.createElement('div');
+        row.className = 'log-entry';
+        row.innerHTML = `<span>${t}</span><span style="font-family:'Courier New',monospace;color:var(--accent);">${s}</span>`;
+        div.appendChild(row);
+      });
+      log.appendChild(div);
+    });
+  }
+  document.getElementById('log-meta').textContent = S.gameName || '';
+  const past = document.getElementById('past-sessions');
+  past.innerHTML = '';
+  const sessions = (S.sessions||[]).slice().reverse();
+  if (!sessions.length) { past.innerHTML = '<p class="muted" style="font-size:13px;">No archived sessions yet.</p>'; return; }
+  sessions.forEach(sess => {
+    const d = new Date(sess.date);
+    const label = sess.name + ' — ' + d.toLocaleDateString();
+    const totals = {};
+    sess.teams.forEach(t => totals[t]=0);
+    Object.values(sess.rounds).forEach(rd => Object.entries(rd).forEach(([t,s])=>{ if(totals[t]!==undefined) totals[t]+=s; }));
+    const sorted = sess.teams.slice().sort((a,b)=>totals[b]-totals[a]);
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.marginBottom = '8px';
+    card.innerHTML = `<div style="font-size:13px;font-family:'Courier New',monospace;color:var(--text2);margin-bottom:8px;">${label}</div>`
+      + sorted.map((t,i) => `<div class="log-entry"><span>${i+1}. ${t}</span><span style="font-family:'Courier New',monospace;color:var(--accent);">${totals[t]}</span></div>`).join('');
+    past.appendChild(card);
+  });
+}
+function exportCSV() {
+  const nums = Object.keys(S.rounds).map(Number).sort((a,b)=>a-b);
+  const totals = getTotals();
+  let csv = 'Team,' + nums.map(r=>'Round '+r).join(',') + ',Total\n';
+  S.teams.forEach(t => {
+    csv += [t, ...nums.map(r => S.rounds[r][t]!==undefined ? S.rounds[r][t] : ''), totals[t]].join(',') + '\n';
+  });
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = (S.gameName||'trivia') + '_scores.csv';
+  a.click();
+}
+
+renderSetup();
+</script>
+</body>
+</html>
