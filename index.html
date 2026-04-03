@@ -713,8 +713,15 @@ function saveRound() {
   if (!allFilled) { if(warnEl) warnEl.textContent = 'Fill in all scores before saving.'; return; }
   if(warnEl) warnEl.textContent = '';
   save(); flash('score-flash'); logRoundToSheet(r);
-  S.currentRound = Math.max(...Object.keys(S.rounds).map(Number)) + 1;
-  save(); renderScores(); updateStatus();
+  const justFinished = S.totalRounds > 0 && r >= S.totalRounds;
+  if (!justFinished) {
+    S.currentRound = Math.max(...Object.keys(S.rounds).map(Number)) + 1;
+    save();
+  }
+  renderScores(); updateStatus();
+  if (justFinished) {
+    setTimeout(() => showEndGame(), 600);
+  }
 }
 
 /* ---- LEADERBOARD ---- */
