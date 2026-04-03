@@ -169,40 +169,52 @@
   .home-leader-crown { font-size: 20px; }
   .home-leader-name { font-size: 16px; font-weight: 600; color: var(--text); flex: 1; }
   .home-leader-pts { font-size: 22px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--gold); }
+  .home-action.end-game { border-color: var(--green); background: var(--green-light); }
+  .home-action.end-game .home-action-icon { background: var(--green); color: #fff; }
+  .home-action.end-game .home-action-title { color: var(--green); }
+  .home-action.end-game .home-action-arrow { color: var(--green); }
+  .stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .stat-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; box-shadow: var(--shadow); }
+  .stat-val { font-size: 24px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--accent); }
+  .stat-label { font-size: 12px; color: var(--text3); margin-top: 3px; font-weight: 500; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(22,32,48,0.55); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1.25rem; }
+  .modal { background: var(--white); border-radius: var(--radius); padding: 1.5rem 1.25rem; width: 100%; max-width: 440px; box-shadow: 0 8px 40px rgba(22,32,48,0.18); max-height: 90vh; overflow-y: auto; }
+  .modal-title { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 0.375rem; }
+  .modal-sub { font-size: 14px; color: var(--text2); margin-bottom: 1.25rem; }
+  .winner-row { display: flex; align-items: center; gap: 12px; background: var(--gold-light); border: 1px solid #e8d8a8; border-radius: var(--radius); padding: 14px 16px; margin-bottom: 8px; }
+  .winner-star { font-size: 20px; color: var(--gold); }
+  .winner-name { font-size: 18px; font-weight: 600; flex: 1; }
+  .winner-pts { font-size: 22px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--gold); }
+  .reset-link { background: none; border: none; color: var(--text3); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; }
+  .final-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--green); margin-top: 2px; display: block; }
 </style>
 </head>
 <body>
-
 <div class="header">
-  <div class="header-top">
-    <h1>Trivia Scorekeeper</h1>
-  </div>
+  <h1>Trivia Scorekeeper</h1>
   <div class="game-status">
     <span class="status-dot" id="status-dot"></span>
     <span id="status-text">No game active</span>
   </div>
 </div>
-
 <nav class="nav" style="grid-template-columns:repeat(3,1fr);">
   <button class="nav-btn active" id="nav-home" onclick="goTo('home',this)">Home</button>
   <button class="nav-btn" id="nav-scores" onclick="goTo('scores',this)">Scores</button>
   <button class="nav-btn" id="nav-board" onclick="goTo('board',this)">Board</button>
 </nav>
-
-<!-- HOME -->
 <div id="screen-home" class="screen active">
   <div id="home-content"></div>
-  <div style="padding:0 1.25rem 2rem;">
-    <hr class="divider" style="margin:0 0 1rem;" />
-    <button onclick="toggleSheets()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;width:100%;">
-      <span id="sheets-arrow" style="font-size:11px;transition:transform 0.2s;">▶</span>
+  <div style="padding-top:0.5rem;">
+    <hr class="divider" style="margin-top:0;" />
+    <button onclick="toggleSheets()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;width:100%;">
+      <span id="sheets-arrow" style="font-size:10px;transition:transform 0.2s;">&#9658;</span>
       Google Sheets logging
-      <span id="sheets-status-dot" style="width:7px;height:7px;border-radius:50%;background:var(--border2);margin-left:4px;"></span>
+      <span id="sheets-status-dot" style="width:7px;height:7px;border-radius:50%;background:var(--border2);margin-left:4px;display:inline-block;"></span>
     </button>
     <div id="sheets-panel" style="display:none;margin-top:12px;">
       <p class="hint">Paste your Apps Script URL to log scores after each round and at end of game.</p>
       <div class="row">
-        <input type="text" id="sheets-url" placeholder="https://script.google.com/macros/s/…" style="flex:1;font-size:14px;" />
+        <input type="text" id="sheets-url" placeholder="https://script.google.com/macros/s/..." style="flex:1;font-size:14px;" />
         <button class="btn btn-sm" onclick="saveSheetUrl()">Save</button>
       </div>
       <p class="saved-flash mt" id="url-flash">URL saved</p>
@@ -211,48 +223,17 @@
     </div>
   </div>
 </div>
-
-<!-- SETUP -->
-<div id="screen-setup" class="screen">
-  <h2>Teams</h2>
-  <div id="team-list" class="mb"></div>
-  <div class="row mb">
-    <input type="text" id="new-name" placeholder="Team name…" onkeydown="if(event.key==='Enter')addTeam()" />
-    <button class="btn btn-sm" onclick="addTeam()">Add</button>
-  </div>
-  <p class="warn" id="setup-warn"></p>
-
-  <button class="btn btn-primary" style="width:100%;padding:15px;font-size:16px;" onclick="startGame()" id="start-btn">Start game</button>
-
-  <div class="row mt" style="justify-content:space-between;align-items:center;">
-    <span class="saved-flash" id="setup-flash">Saved</span>
-    <button onclick="resetAll()" style="background:none;border:none;color:var(--text3);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;padding:4px 0;text-decoration:underline;text-underline-offset:3px;">Reset game</button>
-  </div>
-
-</div>
-
-<!-- SCORES -->
-<div id="screen-scores" class="screen">
-  <div id="scores-content"></div>
-</div>
-
-<!-- LEADERBOARD -->
+<div id="screen-scores" class="screen"><div id="scores-content"></div></div>
 <div id="screen-board" class="screen">
   <div class="row mb">
     <h2 style="margin:0;">Leaderboard</h2>
     <span class="spacer"></span>
     <span style="font-size:13px;color:var(--text3);font-weight:500;" id="lb-meta"></span>
   </div>
-
   <div class="lb-card" id="leaderboard"></div>
-
-  <p class="section-title" style="margin-top:1.5rem;">Scores by round</p>
-  <div class="table-wrap">
-    <table id="round-table"></table>
-  </div>
+  <p class="section-label" style="margin-top:1.5rem;">Scores by round</p>
+  <div class="table-wrap"><table id="round-table"></table></div>
 </div>
-
-<!-- LOG -->
 <div id="screen-log" class="screen">
   <h2>Score log</h2>
   <div id="log-content"></div>
@@ -261,578 +242,423 @@
     <span class="spacer"></span>
     <span style="font-size:13px;color:var(--text3);" id="log-meta"></span>
   </div>
-
   <hr class="divider" />
-  <p class="section-title">Past sessions</p>
+  <p class="section-label">Past sessions</p>
   <div id="past-sessions"></div>
 </div>
-
 <script>
-const KEY = 'trivia_v2';
-let S = load();
-
-function load() {
-  try { const r = localStorage.getItem(KEY); if (r) return JSON.parse(r); } catch(e) {}
-  return { teams:[], rounds:{}, currentRound:1, started:false, gameName:'', sessions:[], sheetUrl:'', totalRounds:0, finished:false };
+var KEY = 'trivia_v2';
+var S = loadState();
+function loadState() {
+  try { var r = localStorage.getItem(KEY); if (r) return JSON.parse(r); } catch(e) {}
+  return { teams:[], rounds:{}, currentRound:1, started:false, gameName:'', sessions:[], sheetUrl:'', totalRounds:0 };
 }
-function save() {
-  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {}
-}
-function flash(id) {
-  const el = document.getElementById(id);
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2000);
+function saveState() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} }
+function flashEl(id) {
+  var el = document.getElementById(id); if (!el) return;
+  el.classList.add('show'); setTimeout(function() { el.classList.remove('show'); }, 2000);
 }
 function updateStatus() {
-  const rounds = Object.keys(S.rounds).length;
-  const dot = document.getElementById('status-dot');
-  dot.classList.toggle('active', S.started);
+  var rounds = Object.keys(S.rounds).length;
+  document.getElementById('status-dot').className = 'status-dot' + (S.started ? ' active' : '');
   document.getElementById('status-text').textContent = S.started
-    ? (S.gameName + ' · ' + rounds + ' round' + (rounds!==1?'s':'') + ' played')
+    ? S.gameName + ' - ' + rounds + ' round' + (rounds !== 1 ? 's' : '') + ' played'
     : 'No game active';
 }
-
 function goTo(screen, btn) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
   document.getElementById('screen-' + screen).classList.add('active');
   if (btn) btn.classList.add('active');
-  if (screen==='home') renderHome();
-  if (screen==='scores') renderScores();
-  if (screen==='board') renderBoard();
-  if (screen==='log') renderLog();
-  if (screen==='setup') renderSetup();
-  // For non-nav screens, don't highlight any nav btn
-  if (screen==='log' || screen==='setup') document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-}
-
-/* ---- END GAME ---- */
-function showEndGame() {
-  const totals = getTotals();
-  const sorted = S.teams.slice().sort((a,b) => totals[b]-totals[a]);
-  const topScore = totals[sorted[0]];
-  const winners = sorted.filter(t => totals[t] === topScore);
-  const isTie = winners.length > 1;
-
-  const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay';
-  overlay.id = 'end-modal';
-
-  const winnerRows = winners.map(w => `
-    <div class="winner-row">
-      <span class="winner-star">&#9733;</span>
-      <span class="winner-name">${w}</span>
-      <span class="winner-pts">${totals[w]}</span>
-    </div>`).join('');
-
-  const runnerUps = sorted.slice(winners.length).map((t,i) => `
-    <div class="log-entry"><span>${winners.length+i+1}. ${t}</span><span class="log-pts">${totals[t]}</span></div>`).join('');
-
-  overlay.innerHTML = `<div class="modal">
-    <p class="modal-title">${isTie ? 'It\'s a tie!' : 'Game over'}</p>
-    <p class="modal-sub">${S.gameName} · ${S.totalRounds} rounds · ${S.teams.length} teams</p>
-    ${winnerRows}
-    ${runnerUps ? '<div class="card" style="padding:0 1rem;margin-top:10px;">'+runnerUps+'</div>' : ''}
-    <button class="btn btn-primary" style="width:100%;padding:15px;font-size:16px;margin-top:1.25rem;" onclick="confirmEndGame()">Save &amp; start new game</button>
-    <button class="btn" style="width:100%;padding:12px;margin-top:8px;" onclick="document.getElementById('end-modal').remove()">Back to game</button>
-  </div>`;
-  document.body.appendChild(overlay);
-}
-async function confirmEndGame() {
-  await logSummaryToSheet();
-  S.sessions = S.sessions || [];
-  S.sessions.push({ name: S.gameName, date: new Date().toISOString(), teams: S.teams.slice(), rounds: JSON.parse(JSON.stringify(S.rounds)) });
-  S.teams=[]; S.rounds={}; S.currentRound=1; S.started=false; S.gameName=''; S.totalRounds=0; S.finished=false;
-  save();
-  const modal = document.getElementById('end-modal');
-  if (modal) modal.remove();
-  goTo('home', document.getElementById('nav-home'));
-  updateStatus();
-}
-function renderHome() {
-  const el = document.getElementById('home-content');
-  const rounds = Object.keys(S.rounds).length;
-  const totals = getTotals();
-  const sorted = S.teams.slice().sort((a,b) => totals[b]-totals[a]);
-  const leader = sorted[0];
-  const isFinalRound = S.totalRounds > 0 && S.currentRound === S.totalRounds;
-  const isGameComplete = S.totalRounds > 0 && rounds >= S.totalRounds;
-
-  if (!S.started) {
-    // Build inline team setup
-    let teamListHtml = S.teams.map((t,i) => `
-      <div class="team-item">
-        <span class="team-pill">${t}</span>
-        <button class="btn btn-icon" style="color:var(--red);border-color:var(--border);box-shadow:none;flex-shrink:0;" onclick="removeTeamHome(${i})">×</button>
-      </div>`).join('');
-
-    const canStart = S.teams.length >= 2;
-    el.innerHTML = `
-      <div class="home-state">
-        <p class="home-label">New game</p>
-        <div id="home-team-list" style="margin-bottom:10px;">${teamListHtml}</div>
-        <div class="row mb" id="home-add-row">
-          <input type="text" id="home-team-input" placeholder="Add a team…" style="flex:1;" onkeydown="if(event.key==='Enter')addTeamHome()" />
-          <button class="btn btn-sm" onclick="addTeamHome()">Add</button>
-        </div>
-        <p class="warn" id="home-warn"></p>
-        <div class="row" style="margin-bottom:10px;align-items:center;gap:12px;">
-          <label style="font-size:14px;font-weight:500;color:var(--text2);white-space:nowrap;">How many rounds?</label>
-          <input type="number" id="home-rounds-input" min="1" max="30" placeholder="4" value="4" style="width:80px;flex-shrink:0;" />
-        </div>
-        <p class="warn" id="home-warn" style="margin-bottom:8px;"></p>
-        <button class="btn btn-primary" style="width:100%;padding:15px;font-size:16px;" onclick="startGameHome()" id="home-start-btn">Start game</button>
-      </div>`;
-  } else {
-    // Game in progress
-
-
-    // Teams section (add during game)
-    let teamListHtml = S.teams.map((t,i) => `
-      <div class="log-entry"><span>${t}</span></div>`).join('');
-
-    el.innerHTML = `
-      <div class="home-state">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <p class="home-label" style="margin:0;">${S.gameName}</p>
-          <span style="font-size:12px;color:var(--text3);font-weight:500;">${rounds} of ${S.totalRounds||'?'} rounds</span>
-        </div>
-        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${S.totalRounds>0?Math.min(100,Math.round(rounds/S.totalRounds*100)):0}%;"></div></div>
-        <div class="home-stat-row">
-          <div class="home-stat">
-            <div class="home-stat-val">${S.teams.length}</div>
-            <div class="home-stat-label">Teams</div>
-          </div>
-          <div class="home-stat">
-            <div class="home-stat-val">${rounds}<span style="font-size:14px;color:var(--text3);"> / ${S.totalRounds}</span></div>
-            <div class="home-stat-label">Rounds played</div>
-          </div>
-        </div>
-        ${isGameComplete ? '' : `<div class="home-action primary" onclick="goTo('scores', document.getElementById('nav-scores'))">
-          <div class="home-action-icon">›</div>
-          <div class="home-action-text">
-            <div class="home-action-title">${isFinalRound ? 'Enter final round scores' : 'Enter round ' + S.currentRound + ' scores'}</div>
-            <div class="home-action-sub">${isFinalRound ? 'Last round — then announce the winner' : rounds + ' of ' + S.totalRounds + ' rounds complete'}</div>
-          </div>
-          <div class="home-action-arrow">›</div>
-        </div>`}
-
-        ${isGameComplete ? `<div class="home-action" style="border-color:var(--green);background:var(--green-light);" onclick="showEndGame()">
-          <div class="home-action-icon" style="background:var(--green);color:#fff;">&#10003;</div>
-          <div class="home-action-text">
-            <div class="home-action-title" style="color:var(--green);">End game &amp; announce winner</div>
-            <div class="home-action-sub">All ${S.totalRounds} rounds complete</div>
-          </div>
-          <div class="home-action-arrow" style="color:var(--green);">›</div>
-        </div>` : ''}
-
-        <hr class="divider" />
-
-        <div style="${isGameComplete ? 'display:none;' : ''}">
-          <div style="margin-bottom:10px;">
-            <p class="section-title" style="margin-bottom:10px;">Teams</p>
-            <div class="card" style="padding:0 1rem;">
-              ${teamListHtml}
-              <div class="row" style="padding:10px 0;">
-                <input type="text" id="home-add-input" placeholder="Add a team…" style="flex:1;font-size:14px;" onkeydown="if(event.key==='Enter')addTeamMidGame()" />
-                <button class="btn btn-sm" onclick="addTeamMidGame()">Add</button>
-              </div>
-            </div>
-            <p class="warn" id="home-warn"></p>
-          </div>
-          <div style="margin-bottom:10px;">
-            <p class="section-title" style="margin-bottom:10px;">Score log</p>
-            <div id="home-log-preview" class="card" style="padding:0 1rem;"></div>
-            <button class="btn btn-sm" onclick="goTo('log',null)" style="margin-top:8px;width:100%;">View full log &amp; export</button>
-          </div>
-        </div>
-        <div style="margin-top:1rem;text-align:center;">
-          <button id="reset-game-btn" style="background:none;border:none;color:var(--text3);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;padding:4px 0;text-decoration:underline;text-underline-offset:3px;">Reset game</button>
-        </div>
-      </div>\`;
-
-    // Populate log preview
-    const logEl = document.getElementById('home-log-preview');
-    if (rounds === 0) {
-      logEl.innerHTML = '<p class="muted" style="padding:10px 0;font-size:13px;">No rounds saved yet.</p>';
-    } else {
-      const nums = Object.keys(S.rounds).map(Number).sort((a,b)=>b-a).slice(0,2);
-      logEl.innerHTML = nums.map(r => {
-        const entries = Object.entries(S.rounds[r]).sort((a,b)=>b[1]-a[1]);
-        return `<p class="section-title" style="padding-top:10px;"">Round ${r}</p>` +
-          entries.map(([t,s]) => `<div class="log-entry"><span>${t}</span><span class="log-pts">${s}</span></div>`).join('');
-      }).join('') + '<div style="height:4px;"></div>';
-    }
-  }
-}
-function addTeamHome() {
-  const input = document.getElementById('home-team-input');
-  const name = input ? input.value.trim() : '';
-  if (!name) return;
-  if (S.teams.map(t=>t.toLowerCase()).includes(name.toLowerCase())) {
-    document.getElementById('home-warn').textContent = 'That name is already taken.'; return;
-  }
-  S.teams.push(name); input.value = '';
-  document.getElementById('home-warn').textContent = '';
-  save(); renderHome();
-  setTimeout(()=>{ const i=document.getElementById('home-team-input'); if(i) i.focus(); },50);
-}
-function removeTeamHome(i) { S.teams.splice(i,1); save(); renderHome(); }
-function startGameHome() {
-  if (S.teams.length < 2) return;
-  const rInput = document.getElementById('home-rounds-input');
-  const rounds = rInput ? parseInt(rInput.value) : 0;
-  if (!rounds || rounds < 1 || rounds > 30) {
-    document.getElementById('home-warn').textContent = 'Enter a number of rounds (1–30).'; return;
-  }
-  S.started = true;
-  S.totalRounds = rounds;
-  S.finished = false;
-  S.gameName = new Date().toLocaleDateString('en-US', {month:'short', day:'numeric'});
-  save(); updateStatus();
-  goTo('scores', document.getElementById('nav-scores'));
-}
-function addTeamMidGame() {
-  const input = document.getElementById('home-add-input');
-  const name = input ? input.value.trim() : '';
-  if (!name) return;
-  if (S.teams.map(t=>t.toLowerCase()).includes(name.toLowerCase())) {
-    document.getElementById('home-warn').textContent = 'That name is already taken.'; return;
-  }
-  S.teams.push(name); input.value = '';
-  document.getElementById('home-warn').textContent = '';
-  save(); renderHome(); updateStatus();
-}
-
-/* ---- SETUP ---- */
-function renderSetup() {
-  const list = document.getElementById('team-list');
-  list.innerHTML = '';
-  S.teams.forEach((t, i) => {
-    const d = document.createElement('div');
-    d.className = 'team-item';
-    d.innerHTML = `<span class="team-pill">${t}</span>
-      ${!S.started ? `<button class="btn btn-icon" style="color:var(--red);border-color:var(--border);box-shadow:none;" onclick="removeTeam(${i})">×</button>` : ''}`;
-    list.appendChild(d);
-  });
-  const sb = document.getElementById('start-btn');
-  if (S.started) { sb.textContent = 'Game in progress'; sb.disabled = true; sb.style.opacity='0.5'; }
-  else { sb.textContent = 'Start game'; sb.disabled = false; sb.style.opacity='1'; }
-  document.getElementById('new-name').disabled = S.started;
-  const urlEl = document.getElementById('sheets-url');
-  if (urlEl) urlEl.value = S.sheetUrl || '';
-  updateSheetsStatus();
-  updateStatus();
-}
-function addTeam() {
-  if (S.started) return;
-  const el = document.getElementById('new-name');
-  const name = el.value.trim();
-  if (!name) return;
-  if (S.teams.map(t=>t.toLowerCase()).includes(name.toLowerCase())) {
-    document.getElementById('setup-warn').textContent = 'That name is already taken.'; return;
-  }
-  S.teams.push(name); el.value = '';
-  document.getElementById('setup-warn').textContent = '';
-  save(); renderSetup(); flash('setup-flash');
-}
-function removeTeam(i) { S.teams.splice(i,1); save(); renderSetup(); }
-function startGame() {
-  if (S.teams.length < 2) { document.getElementById('setup-warn').textContent = 'Add at least 2 teams first.'; return; }
-  S.started = true;
-  S.gameName = new Date().toLocaleDateString('en-US', {month:'short', day:'numeric'});
-  save(); renderSetup();
-  document.getElementById('setup-warn').textContent = '';
-}
-function resetAll() {
-  if (!confirm('Reset this game? Scores will not be saved.')) return;
-  S.teams=[]; S.rounds={}; S.currentRound=1; S.started=false; S.gameName=''; S.totalRounds=0; S.finished=false;
-  save(); renderHome(); updateStatus();
-}
-function saveSheetUrl() {
-  const val = document.getElementById('sheets-url').value.trim();
-  if (val && !val.startsWith('https://script.google.com')) {
-    document.getElementById('url-warn').textContent = 'URL should start with https://script.google.com'; return;
-  }
-  document.getElementById('url-warn').textContent = '';
-  S.sheetUrl = val; save(); flash('url-flash'); updateSheetsStatus();
-}
-function updateSheetsStatus() {
-  const el = document.getElementById('sheets-status');
-  if (el) {
-    if (S.sheetUrl) { el.textContent = 'Logging enabled'; el.className = 'sheets-status on'; }
-    else { el.textContent = 'No URL saved'; el.className = 'sheets-status off'; }
-  }
-  const dot = document.getElementById('sheets-status-dot');
-  if (dot) dot.style.background = S.sheetUrl ? 'var(--green)' : 'var(--border2)';
+  if (screen === 'home') renderHome();
+  if (screen === 'scores') renderScores();
+  if (screen === 'board') renderBoard();
+  if (screen === 'log') renderLog();
 }
 function toggleSheets() {
-  const panel = document.getElementById('sheets-panel');
-  const arrow = document.getElementById('sheets-arrow');
-  const open = panel.style.display === 'none';
+  var panel = document.getElementById('sheets-panel');
+  var arrow = document.getElementById('sheets-arrow');
+  var open = panel.style.display === 'none';
   panel.style.display = open ? 'block' : 'none';
   arrow.style.transform = open ? 'rotate(90deg)' : 'rotate(0deg)';
 }
-async function logRoundToSheet(roundNum) {
-  if (!S.sheetUrl) return;
-  const date = new Date().toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'});
-  const scores = S.teams.map(t => ({ team: t, points: S.rounds[roundNum][t] || 0 }));
-  try {
-    await fetch(S.sheetUrl, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ type:'round', date, gameName: S.gameName, round: roundNum, scores }) });
-  } catch(e) {}
+function saveSheetUrl() {
+  var val = document.getElementById('sheets-url').value.trim();
+  if (val && val.indexOf('https://script.google.com') !== 0) {
+    document.getElementById('url-warn').textContent = 'URL should start with https://script.google.com'; return;
+  }
+  document.getElementById('url-warn').textContent = '';
+  S.sheetUrl = val; saveState(); flashEl('url-flash'); updateSheetsStatus();
 }
-async function logSummaryToSheet() {
+function updateSheetsStatus() {
+  var el = document.getElementById('sheets-status');
+  var dot = document.getElementById('sheets-status-dot');
+  var urlEl = document.getElementById('sheets-url');
+  if (urlEl) urlEl.value = S.sheetUrl || '';
+  if (el) { el.textContent = S.sheetUrl ? 'Logging enabled' : 'No URL saved'; el.className = 'sheets-status ' + (S.sheetUrl ? 'on' : 'off'); }
+  if (dot) dot.style.background = S.sheetUrl ? 'var(--green)' : 'var(--border2)';
+}
+function logRoundToSheet(roundNum) {
   if (!S.sheetUrl) return;
-  const date = new Date().toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'});
-  const totals = getTotals();
-  const sorted = S.teams.slice().sort((a,b) => totals[b]-totals[a]);
-  let rank = 1;
-  const results = sorted.map((t,i) => {
+  var date = new Date().toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'});
+  var scores = S.teams.map(function(t) { return { team: t, points: S.rounds[roundNum][t] || 0 }; });
+  fetch(S.sheetUrl, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ type:'round', date:date, gameName:S.gameName, round:roundNum, scores:scores }) })
+    .catch(function(e) { console.warn('Sheet log failed:', e); });
+}
+function logSummaryToSheet() {
+  if (!S.sheetUrl) return;
+  var date = new Date().toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'});
+  var totals = getTotals();
+  var sorted = S.teams.slice().sort(function(a,b) { return totals[b]-totals[a]; });
+  var rank = 1;
+  var results = sorted.map(function(t, i) {
     if (i > 0 && totals[t] < totals[sorted[i-1]]) rank = i+1;
-    return { rank, team: t, total: totals[t] };
+    return { rank:rank, team:t, total:totals[t] };
   });
-  try {
-    await fetch(S.sheetUrl, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ type:'summary', date, gameName: S.gameName, roundsPlayed: Object.keys(S.rounds).length, results }) });
-  } catch(e) {}
+  fetch(S.sheetUrl, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ type:'summary', date:date, gameName:S.gameName, roundsPlayed:Object.keys(S.rounds).length, results:results }) })
+    .catch(function(e) { console.warn('Sheet summary failed:', e); });
 }
-
-/* ---- SCORES ---- */
-function renderScores() {
-  const wrap = document.getElementById('scores-content');
-  wrap.innerHTML = '';
-
-  if (!S.teams.length) {
-    wrap.innerHTML = `<div class="home-state">
-      <p class="home-label">No teams yet</p>
-      <div class="home-action primary" onclick="goTo('setup', document.querySelectorAll('.nav-btn')[4])">
-        <div class="home-action-icon">+</div>
-        <div class="home-action-text">
-          <div class="home-action-title">Add teams first</div>
-          <div class="home-action-sub">Go to Teams to set up before scoring</div>
-        </div>
-        <div class="home-action-arrow">›</div>
-      </div>
-    </div>`; return;
-  }
-
-  if (!S.started) {
-    wrap.innerHTML = `<div class="home-state">
-      <p class="home-label">Game not started</p>
-      <div class="home-action primary" onclick="goTo('setup', document.querySelectorAll('.nav-btn')[4])">
-        <div class="home-action-icon">›</div>
-        <div class="home-action-text">
-          <div class="home-action-title">Start the game first</div>
-          <div class="home-action-sub">Go to Teams and tap Start game</div>
-        </div>
-        <div class="home-action-arrow">›</div>
-      </div>
-    </div>`; return;
-  }
-
-  const r = S.currentRound;
-  const existing = S.rounds[r] || {};
-  const isEdit = Object.keys(existing).length > 0;
-  const isFinal = S.totalRounds > 0 && r === S.totalRounds;
-  const isPastFinal = S.totalRounds > 0 && r > S.totalRounds;
-
-  const header = document.createElement('div');
-  header.className = 'row mb';
-  header.innerHTML = `
-    <div>
-      <h2 style="margin:0;">Round ${r}</h2>
-      ${isFinal ? '<span style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--green);margin-top:2px;display:block;">Final round</span>' : ''}
-    </div>
-    <span class="spacer"></span>
-    <button class="btn btn-icon btn-ghost" onclick="changeRound(-1)" id="prev-btn" ${r<=1?'disabled':''}>←</button>
-    <button class="btn btn-icon btn-ghost" onclick="changeRound(1)">→</button>`;
-  wrap.appendChild(header);
-
-  if (isEdit) {
-    const hint = document.createElement('p');
-    hint.className = 'hint';
-    hint.textContent = 'Editing round ' + r + ' — save to update the leaderboard.';
-    wrap.appendChild(hint);
-  }
-
-  S.teams.forEach(t => {
-    const val = existing[t] !== undefined ? existing[t] : '';
-    const div = document.createElement('div');
-    div.className = 'score-card';
-    const safeId = 'sc_' + t.replace(/[^a-z0-9]/gi,'_');
-    div.innerHTML = `<span class="team-name">${t}</span>
-      <input type="number" id="${safeId}" value="${val}" min="0" placeholder="0" inputmode="numeric" />`;
-    wrap.appendChild(div);
-  });
-
-  const saveBtn = document.createElement('button');
-  saveBtn.className = 'btn btn-primary mt';
-  saveBtn.style = 'width:100%;padding:15px;font-size:16px;';
-  saveBtn.textContent = isFinal ? 'Save final round' : 'Save round';
-  saveBtn.onclick = saveRound;
-  wrap.appendChild(saveBtn);
-
-  const warn = document.createElement('p');
-  warn.className = 'warn'; warn.id = 'score-warn';
-  wrap.appendChild(warn);
-
-  const flash = document.createElement('p');
-  flash.className = 'saved-flash mt'; flash.id = 'score-flash';
-  flash.textContent = 'Round saved ✓';
-  wrap.appendChild(flash);
-
-  // Show end game button only on the final round after it has been saved
-  const roundsSaved = Object.keys(S.rounds).length;
-  if (S.totalRounds > 0 && roundsSaved >= S.totalRounds && r === S.totalRounds) {
-    const endDiv = document.createElement('div');
-    endDiv.style = 'margin-top:1rem;';
-    endDiv.innerHTML = `<div class="home-action" style="border-color:var(--green);background:var(--green-light);" onclick="showEndGame()">
-      <div class="home-action-icon" style="background:var(--green);color:#fff;">&#10003;</div>
-      <div class="home-action-text">
-        <div class="home-action-title" style="color:var(--green);">End game &amp; announce winner</div>
-        <div class="home-action-sub">All ${S.totalRounds} rounds complete</div>
-      </div>
-      <div class="home-action-arrow" style="color:var(--green);">›</div>
-    </div>`;
-    wrap.appendChild(endDiv);
-  }
-}
-function changeRound(dir) {
-  if (dir===-1 && S.currentRound<=1) return;
-  S.currentRound += dir; save(); renderScores();
-}
-function saveRound() {
-  const r = S.currentRound;
-  if (!S.rounds[r]) S.rounds[r] = {};
-  let allFilled = true;
-  S.teams.forEach(t => {
-    const el = document.getElementById('sc_' + t.replace(/[^a-z0-9]/gi,'_'));
-    if (!el || el.value.trim()==='') { allFilled = false; return; }
-    S.rounds[r][t] = parseFloat(el.value) || 0;
-  });
-  const warnEl = document.getElementById('score-warn');
-  if (!allFilled) { if(warnEl) warnEl.textContent = 'Fill in all scores before saving.'; return; }
-  if(warnEl) warnEl.textContent = '';
-  save(); flash('score-flash'); logRoundToSheet(r);
-  const justFinished = S.totalRounds > 0 && r >= S.totalRounds;
-  if (!justFinished) {
-    S.currentRound = Math.max(...Object.keys(S.rounds).map(Number)) + 1;
-    save();
-  }
-  renderScores(); updateStatus();
-  if (justFinished) {
-    setTimeout(() => showEndGame(), 600);
-  }
-}
-
-/* ---- LEADERBOARD ---- */
 function getTotals() {
-  const totals = {};
-  S.teams.forEach(t => totals[t] = 0);
-  Object.values(S.rounds).forEach(rd => {
-    Object.entries(rd).forEach(([t,s]) => { if (totals[t]!==undefined) totals[t] += s; });
+  var totals = {};
+  S.teams.forEach(function(t) { totals[t] = 0; });
+  Object.values(S.rounds).forEach(function(rd) {
+    Object.entries(rd).forEach(function(e) { if (totals[e[0]] !== undefined) totals[e[0]] += e[1]; });
   });
   return totals;
 }
+function el(tag, cls, text) {
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+function makeAction(title, sub, isEnd, onclick) {
+  var div = el('div', 'home-action ' + (isEnd ? 'end-game' : 'primary'));
+  div.onclick = onclick;
+  var icon = el('div', 'home-action-icon', isEnd ? '' : '>');
+  if (isEnd) icon.innerHTML = '&#10003;';
+  var td = el('div', 'home-action-text');
+  td.appendChild(el('div', 'home-action-title', title));
+  td.appendChild(el('div', 'home-action-sub', sub));
+  div.appendChild(icon); div.appendChild(td); div.appendChild(el('div', 'home-action-arrow', '>'));
+  return div;
+}
+function renderHome() {
+  updateSheetsStatus();
+  var root = document.getElementById('home-content');
+  var rounds = Object.keys(S.rounds).length;
+  var isComplete = S.totalRounds > 0 && rounds >= S.totalRounds;
+  var isFinalRound = S.totalRounds > 0 && S.currentRound === S.totalRounds;
+  root.innerHTML = '';
+  if (!S.started) { renderHomeSetup(root); } else { renderHomeGame(root, rounds, isComplete, isFinalRound); }
+}
+function renderHomeSetup(root) {
+  root.appendChild(el('p', 'home-label', 'New game'));
+  var teamDiv = el('div'); teamDiv.style.marginBottom = '8px';
+  S.teams.forEach(function(t, i) {
+    var row = el('div', 'team-item');
+    row.appendChild(el('span', 'team-pill', t));
+    var btn = el('button', 'btn btn-icon', 'x');
+    btn.style.cssText = 'color:var(--red);border-color:var(--border);box-shadow:none;flex-shrink:0;';
+    btn.onclick = (function(idx) { return function() { S.teams.splice(idx,1); saveState(); renderHome(); }; })(i);
+    row.appendChild(btn); teamDiv.appendChild(row);
+  });
+  root.appendChild(teamDiv);
+  var addRow = el('div'); addRow.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;';
+  var inp = el('input'); inp.type='text'; inp.id='home-team-input'; inp.placeholder='Add a team...'; inp.style.flex='1';
+  inp.onkeydown = function(e) { if (e.key === 'Enter') addTeamHome(); };
+  var addBtn = el('button', 'btn btn-sm', 'Add'); addBtn.onclick = addTeamHome;
+  addRow.appendChild(inp); addRow.appendChild(addBtn); root.appendChild(addRow);
+  var rRow = el('div'); rRow.style.cssText = 'display:flex;gap:8px;align-items:center;margin-bottom:8px;';
+  var rInp = el('input'); rInp.type='number'; rInp.id='home-rounds-input'; rInp.min='1'; rInp.max='30'; rInp.value='4';
+  rInp.style.cssText = 'width:60px;font-size:15px;text-align:center;';
+  rRow.appendChild(rInp); rRow.appendChild(el('label', null, 'rounds')); root.appendChild(rRow);
+  var warn = el('p', 'warn'); warn.id = 'home-warn'; warn.style.marginBottom = '8px'; root.appendChild(warn);
+  var startBtn = el('button', 'btn btn-primary', 'Start game');
+  startBtn.style.cssText = 'width:100%;padding:15px;font-size:16px;';
+  startBtn.onclick = startGameHome; root.appendChild(startBtn);
+}
+function renderHomeGame(root, rounds, isComplete, isFinalRound) {
+  var totals = getTotals();
+  var sorted = S.teams.slice().sort(function(a,b) { return totals[b]-totals[a]; });
+  var hdr = el('div'); hdr.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;';
+  var lbl = el('p', 'home-label', S.gameName); lbl.style.margin = '0';
+  var plbl = el('span', null, rounds + ' of ' + S.totalRounds + ' rounds');
+  plbl.style.cssText = 'font-size:12px;color:var(--text3);font-weight:500;';
+  hdr.appendChild(lbl); hdr.appendChild(plbl); root.appendChild(hdr);
+  var barWrap = el('div', 'progress-bar-wrap');
+  var barFill = el('div', 'progress-bar-fill');
+  barFill.style.width = (S.totalRounds > 0 ? Math.min(100, Math.round(rounds/S.totalRounds*100)) : 0) + '%';
+  barWrap.appendChild(barFill); root.appendChild(barWrap);
+  var sr = el('div', 'stat-row');
+  sr.appendChild(makeStatCard(String(S.teams.length), 'Teams'));
+  sr.appendChild(makeStatCard(rounds + ' / ' + S.totalRounds, 'Rounds played'));
+  root.appendChild(sr);
+  if (!isComplete) {
+    root.appendChild(makeAction(
+      isFinalRound ? 'Enter final round scores' : 'Enter round ' + S.currentRound + ' scores',
+      isFinalRound ? 'Last round - then announce the winner' : rounds + ' of ' + S.totalRounds + ' rounds complete',
+      false, function() { goTo('scores', document.getElementById('nav-scores')); }
+    ));
+  } else {
+    root.appendChild(makeAction('End game & announce winner', 'All ' + S.totalRounds + ' rounds complete', true, showEndGame));
+  }
+  var sec = el('div'); sec.style.display = isComplete ? 'none' : 'block';
+  sec.appendChild(el('hr', 'divider'));
+  var tlbl = el('p', 'section-label', 'Teams'); tlbl.style.marginBottom = '10px'; sec.appendChild(tlbl);
+  var tc = el('div', 'card'); tc.style.cssText = 'padding:0 1rem;margin-bottom:0;';
+  sorted.forEach(function(t) {
+    var row = el('div', 'log-entry'); row.appendChild(el('span', null, t)); tc.appendChild(row);
+  });
+  var arow = el('div', 'row'); arow.style.padding = '10px 0';
+  var ai = el('input'); ai.type='text'; ai.id='home-add-input'; ai.placeholder='Add a team...'; ai.style.cssText='flex:1;font-size:14px;';
+  ai.onkeydown = function(e) { if (e.key === 'Enter') addTeamMidGame(); };
+  var ab = el('button', 'btn btn-sm', 'Add'); ab.onclick = addTeamMidGame;
+  arow.appendChild(ai); arow.appendChild(ab); tc.appendChild(arow); sec.appendChild(tc);
+  var aw = el('p', 'warn'); aw.id = 'home-warn'; sec.appendChild(aw);
+  var llbl = el('p', 'section-label', 'Score log'); llbl.style.cssText = 'margin-top:1rem;margin-bottom:10px;'; sec.appendChild(llbl);
+  var lc = el('div', 'card'); lc.id = 'home-log-preview'; lc.style.cssText = 'padding:0 1rem;margin-bottom:0;'; sec.appendChild(lc);
+  var lb = el('button', 'btn btn-sm', 'View full log & export'); lb.style.cssText = 'margin-top:8px;width:100%;';
+  lb.onclick = function() { goTo('log', null); }; sec.appendChild(lb);
+  root.appendChild(sec);
+  var rw = el('div'); rw.style.cssText = 'margin-top:1.25rem;text-align:center;';
+  var rb = el('button', 'reset-link', 'Reset game'); rb.onclick = resetAll; rw.appendChild(rb); root.appendChild(rw);
+  renderHomeLogPreview();
+}
+function makeStatCard(val, label) {
+  var c = el('div', 'stat-card');
+  c.appendChild(el('div', 'stat-val', val));
+  c.appendChild(el('div', 'stat-label', label));
+  return c;
+}
+function renderHomeLogPreview() {
+  var logEl = document.getElementById('home-log-preview'); if (!logEl) return;
+  var nums = Object.keys(S.rounds).map(Number).sort(function(a,b) { return b-a; }).slice(0,2);
+  if (nums.length === 0) { logEl.innerHTML = '<p class="muted" style="padding:10px 0;font-size:13px;">No rounds saved yet.</p>'; return; }
+  logEl.innerHTML = '';
+  nums.forEach(function(r) {
+    var lbl = el('p', 'section-label', 'Round ' + r); lbl.style.paddingTop = '10px'; logEl.appendChild(lbl);
+    Object.entries(S.rounds[r]).sort(function(a,b) { return b[1]-a[1]; }).forEach(function(e) {
+      var row = el('div', 'log-entry');
+      row.appendChild(el('span', null, e[0])); row.appendChild(el('span', 'log-pts', e[1]));
+      logEl.appendChild(row);
+    });
+  });
+}
+function addTeamHome() {
+  var input = document.getElementById('home-team-input'); var name = input ? input.value.trim() : '';
+  if (!name) return;
+  if (S.teams.map(function(t){return t.toLowerCase();}).indexOf(name.toLowerCase()) >= 0) {
+    var w = document.getElementById('home-warn'); if (w) w.textContent = 'Name already taken.'; return;
+  }
+  S.teams.push(name); if (input) input.value = '';
+  var w = document.getElementById('home-warn'); if (w) w.textContent = '';
+  saveState(); renderHome();
+  setTimeout(function() { var i = document.getElementById('home-team-input'); if (i) i.focus(); }, 50);
+}
+function startGameHome() {
+  if (S.teams.length < 2) { var w = document.getElementById('home-warn'); if (w) w.textContent = 'Add at least 2 teams first.'; return; }
+  var rEl = document.getElementById('home-rounds-input'); var rounds = rEl ? parseInt(rEl.value) : 0;
+  if (!rounds || rounds < 1 || rounds > 30) { var w = document.getElementById('home-warn'); if (w) w.textContent = 'Enter rounds (1-30).'; return; }
+  S.started = true; S.totalRounds = rounds;
+  S.gameName = new Date().toLocaleDateString('en-US', {month:'short', day:'numeric'});
+  saveState(); updateStatus(); goTo('scores', document.getElementById('nav-scores'));
+}
+function addTeamMidGame() {
+  var input = document.getElementById('home-add-input'); var name = input ? input.value.trim() : '';
+  if (!name) return;
+  if (S.teams.map(function(t){return t.toLowerCase();}).indexOf(name.toLowerCase()) >= 0) {
+    var w = document.getElementById('home-warn'); if (w) w.textContent = 'Name already taken.'; return;
+  }
+  S.teams.push(name); if (input) input.value = '';
+  saveState(); updateStatus(); renderHome();
+}
+function resetAll() {
+  if (!confirm('Reset this game? Scores will not be saved.')) return;
+  S.teams=[]; S.rounds={}; S.currentRound=1; S.started=false; S.gameName=''; S.totalRounds=0;
+  saveState(); updateStatus(); goTo('home', document.getElementById('nav-home'));
+}
+function showEndGame() {
+  var totals = getTotals();
+  var sorted = S.teams.slice().sort(function(a,b) { return totals[b]-totals[a]; });
+  var topScore = totals[sorted[0]];
+  var winners = sorted.filter(function(t) { return totals[t] === topScore; });
+  var overlay = el('div', 'modal-overlay'); overlay.id = 'end-modal';
+  var modal = el('div', 'modal');
+  modal.appendChild(el('p', 'modal-title', winners.length > 1 ? "It's a tie!" : 'Game over'));
+  modal.appendChild(el('p', 'modal-sub', S.gameName + ' - ' + S.totalRounds + ' rounds - ' + S.teams.length + ' teams'));
+  winners.forEach(function(w) {
+    var row = el('div', 'winner-row');
+    row.appendChild(el('span', 'winner-star', '*'));
+    row.appendChild(el('span', 'winner-name', w));
+    row.appendChild(el('span', 'winner-pts', String(totals[w])));
+    modal.appendChild(row);
+  });
+  var others = sorted.slice(winners.length);
+  if (others.length > 0) {
+    var oc = el('div', 'card'); oc.style.cssText = 'padding:0 1rem;margin-top:10px;';
+    others.forEach(function(t, i) {
+      var row = el('div', 'log-entry');
+      row.appendChild(el('span', null, (winners.length+i+1) + '. ' + t));
+      row.appendChild(el('span', 'log-pts', String(totals[t])));
+      oc.appendChild(row);
+    });
+    modal.appendChild(oc);
+  }
+  var sb = el('button', 'btn btn-primary', 'Save & start new game');
+  sb.style.cssText = 'width:100%;padding:15px;font-size:16px;margin-top:1.25rem;';
+  sb.onclick = confirmEndGame; modal.appendChild(sb);
+  var bb = el('button', 'btn', 'Back to game'); bb.style.cssText = 'width:100%;padding:12px;margin-top:8px;';
+  bb.onclick = function() { var m = document.getElementById('end-modal'); if (m) m.remove(); };
+  modal.appendChild(bb); overlay.appendChild(modal); document.body.appendChild(overlay);
+}
+function confirmEndGame() {
+  logSummaryToSheet();
+  S.sessions = S.sessions || [];
+  S.sessions.push({ name:S.gameName, date:new Date().toISOString(), teams:S.teams.slice(), rounds:JSON.parse(JSON.stringify(S.rounds)) });
+  S.teams=[]; S.rounds={}; S.currentRound=1; S.started=false; S.gameName=''; S.totalRounds=0;
+  saveState(); var m = document.getElementById('end-modal'); if (m) m.remove();
+  goTo('home', document.getElementById('nav-home')); updateStatus();
+}
+function renderScores() {
+  var wrap = document.getElementById('scores-content'); wrap.innerHTML = '';
+  if (!S.teams.length) { wrap.appendChild(makeAction('Add teams first', 'Go to Home to add teams', false, function() { goTo('home', document.getElementById('nav-home')); })); return; }
+  if (!S.started) { wrap.appendChild(makeAction('Start the game first', 'Go to Home and tap Start game', false, function() { goTo('home', document.getElementById('nav-home')); })); return; }
+  var r = S.currentRound; var existing = S.rounds[r] || {};
+  var isEdit = Object.keys(existing).length > 0;
+  var isFinal = S.totalRounds > 0 && r === S.totalRounds;
+  var isComplete = S.totalRounds > 0 && Object.keys(S.rounds).length >= S.totalRounds;
+  var hdr = el('div', 'row mb');
+  var tw = el('div'); var h2 = el('h2', null, 'Round ' + r); h2.style.margin = '0'; tw.appendChild(h2);
+  if (isFinal) { var fl = el('span', 'final-label', 'Final round'); tw.appendChild(fl); }
+  var pb = el('button', 'btn btn-icon btn-ghost', '<'); pb.disabled = r <= 1; pb.onclick = function() { changeRound(-1); };
+  var nb = el('button', 'btn btn-icon btn-ghost', '>'); nb.onclick = function() { changeRound(1); };
+  hdr.appendChild(tw); hdr.appendChild(el('span', 'spacer')); hdr.appendChild(pb); hdr.appendChild(nb);
+  wrap.appendChild(hdr);
+  if (isEdit) { wrap.appendChild(el('p', 'hint', 'Editing round ' + r + ' - save to update the leaderboard.')); }
+  S.teams.forEach(function(t) {
+    var val = existing[t] !== undefined ? existing[t] : '';
+    var card = el('div', 'score-card');
+    card.appendChild(el('span', 'team-name', t));
+    var inp = el('input'); inp.type='number'; inp.id='sc_'+t.replace(/[^a-z0-9]/gi,'_');
+    inp.value=val; inp.min='0'; inp.placeholder='0'; inp.setAttribute('inputmode','numeric');
+    card.appendChild(inp); wrap.appendChild(card);
+  });
+  var sb = el('button', 'btn btn-primary mt', isFinal ? 'Save final round' : 'Save round');
+  sb.style.cssText = 'width:100%;padding:15px;font-size:16px;'; sb.onclick = saveRound; wrap.appendChild(sb);
+  var we = el('p', 'warn'); we.id = 'score-warn'; wrap.appendChild(we);
+  var sf = el('p', 'saved-flash mt', 'Round saved'); sf.id = 'score-flash'; wrap.appendChild(sf);
+  if (isComplete && r === S.totalRounds) {
+    var ed = el('div'); ed.style.marginTop = '1rem';
+    ed.appendChild(makeAction('End game & announce winner', 'All ' + S.totalRounds + ' rounds complete', true, showEndGame));
+    wrap.appendChild(ed);
+  }
+}
+function changeRound(dir) {
+  if (dir === -1 && S.currentRound <= 1) return;
+  S.currentRound += dir; saveState(); renderScores();
+}
+function saveRound() {
+  var r = S.currentRound; if (!S.rounds[r]) S.rounds[r] = {};
+  var allFilled = true;
+  S.teams.forEach(function(t) {
+    var e = document.getElementById('sc_'+t.replace(/[^a-z0-9]/gi,'_'));
+    if (!e || e.value.trim() === '') { allFilled = false; return; }
+    S.rounds[r][t] = parseFloat(e.value) || 0;
+  });
+  var we = document.getElementById('score-warn');
+  if (!allFilled) { if (we) we.textContent = 'Fill in all scores before saving.'; return; }
+  if (we) we.textContent = '';
+  saveState(); flashEl('score-flash'); logRoundToSheet(r);
+  var justFinished = S.totalRounds > 0 && r >= S.totalRounds;
+  if (!justFinished) { S.currentRound = Math.max.apply(null, Object.keys(S.rounds).map(Number)) + 1; saveState(); }
+  renderScores(); updateStatus();
+  if (justFinished) { setTimeout(showEndGame, 600); }
+}
 function renderBoard() {
-  const totals = getTotals();
-  const roundNums = Object.keys(S.rounds).map(Number).sort((a,b)=>a-b);
-  const rounds = roundNums.length;
+  var totals = getTotals();
+  var roundNums = Object.keys(S.rounds).map(Number).sort(function(a,b){return a-b;});
+  var rounds = roundNums.length;
   document.getElementById('lb-meta').textContent = rounds + ' round' + (rounds!==1?'s':'');
-  const sorted = S.teams.slice().sort((a,b) => totals[b]-totals[a]);
-
-  const lb = document.getElementById('leaderboard');
-  lb.innerHTML = '';
+  var sorted = S.teams.slice().sort(function(a,b){return totals[b]-totals[a];});
+  var lb = document.getElementById('leaderboard'); lb.innerHTML = '';
   if (!sorted.length) { lb.innerHTML = '<p class="muted" style="padding:1rem;">No teams yet.</p>'; }
   else {
-    let rank = 1;
-    sorted.forEach((t,i) => {
-      if (i > 0 && totals[t] < totals[sorted[i-1]]) rank = i+1;
-      const tied = sorted.filter(x => totals[x]===totals[t]).length > 1;
-      const cls = rank===1?'rb-1':rank===2?'rb-2':rank===3?'rb-3':'rb-n';
-      const item = document.createElement('div');
-      item.className = 'lb-item' + (rank===1?' rank-first':'');
-      item.innerHTML = `<div class="rank-badge ${cls}">${rank}</div>
-        <div class="lb-name">${t}${tied?'<span class="tie-tag">TIE</span>':''}</div>
-        <div class="lb-pts">${totals[t]}</div>`;
+    var rank = 1;
+    sorted.forEach(function(t,i) {
+      if (i>0 && totals[t]<totals[sorted[i-1]]) rank=i+1;
+      var tied = sorted.filter(function(x){return totals[x]===totals[t];}).length>1;
+      var cls = rank===1?'rb-1':rank===2?'rb-2':rank===3?'rb-3':'rb-n';
+      var item = el('div','lb-item'+(rank===1?' rank-first':''));
+      var badge = el('div','rank-badge '+cls,String(rank));
+      var name = el('div','lb-name',t);
+      if (tied) { var tag=el('span','tie-tag','TIE'); name.appendChild(tag); }
+      item.appendChild(badge); item.appendChild(name); item.appendChild(el('div','lb-pts',String(totals[t])));
       lb.appendChild(item);
     });
   }
-
-  const tbl = document.getElementById('round-table');
-  tbl.innerHTML = '';
-  if (!rounds || !sorted.length) {
-    tbl.innerHTML = '<tr><td style="padding:1rem;color:var(--text3);font-family:DM Sans,sans-serif;">No rounds yet.</td></tr>'; return;
-  }
-  let hdr = '<tr><th>Team</th>';
-  roundNums.forEach(r => { hdr += `<th>R${r}</th>`; });
-  hdr += '<th style="color:var(--accent);">Total</th></tr>';
-  tbl.innerHTML = hdr;
-  sorted.forEach(t => {
-    let row = `<tr><td>${t}</td>`;
-    roundNums.forEach(r => {
-      const val = S.rounds[r] && S.rounds[r][t] !== undefined ? S.rounds[r][t] : '—';
-      row += `<td>${val}</td>`;
-    });
-    row += `<td class="total-col">${totals[t]}</td></tr>`;
-    tbl.innerHTML += row;
+  var tbl = document.getElementById('round-table'); tbl.innerHTML='';
+  if (!rounds||!sorted.length) { tbl.innerHTML='<tr><td style="padding:1rem;color:var(--text3);">No rounds yet.</td></tr>'; return; }
+  var hdr='<tr><th>Team</th>';
+  roundNums.forEach(function(r){hdr+='<th>R'+r+'</th>';});
+  hdr+='<th style="color:var(--accent);">Total</th></tr>';
+  tbl.innerHTML=hdr;
+  sorted.forEach(function(t){
+    var row='<tr><td>'+t+'</td>';
+    roundNums.forEach(function(r){row+='<td>'+(S.rounds[r]&&S.rounds[r][t]!==undefined?S.rounds[r][t]:'-')+'</td>';});
+    row+='<td class="total-col">'+totals[t]+'</td></tr>';
+    tbl.innerHTML+=row;
   });
 }
-
-/* ---- LOG ---- */
 function renderLog() {
-  const nums = Object.keys(S.rounds).map(Number).sort((a,b)=>a-b);
-  const log = document.getElementById('log-content');
-  log.innerHTML = '';
-  if (!nums.length) { log.innerHTML = '<p class="muted">No rounds saved yet.</p>'; }
+  var nums = Object.keys(S.rounds).map(Number).sort(function(a,b){return a-b;});
+  var log = document.getElementById('log-content'); log.innerHTML='';
+  if (!nums.length) { log.innerHTML='<p class="muted">No rounds saved yet.</p>'; }
   else {
-    nums.forEach(r => {
-      const div = document.createElement('div');
-      div.className = 'card log-round';
-      div.innerHTML = `<p class="section-title" style="margin-bottom:8px;">Round ${r}</p>`;
-      const sorted = Object.entries(S.rounds[r]).sort((a,b)=>b[1]-a[1]);
-      sorted.forEach(([t,s]) => {
-        const row = document.createElement('div');
-        row.className = 'log-entry';
-        row.innerHTML = `<span>${t}</span><span class="log-pts">${s}</span>`;
+    nums.forEach(function(r) {
+      var div = el('div','card'); div.style.marginBottom='10px';
+      var lbl = el('p','section-label','Round '+r); lbl.style.marginBottom='8px'; div.appendChild(lbl);
+      Object.entries(S.rounds[r]).sort(function(a,b){return b[1]-a[1];}).forEach(function(e) {
+        var row=el('div','log-entry');
+        row.appendChild(el('span',null,e[0])); row.appendChild(el('span','log-pts',e[1]));
         div.appendChild(row);
       });
       log.appendChild(div);
     });
   }
-  document.getElementById('log-meta').textContent = S.gameName || '';
-  const past = document.getElementById('past-sessions');
-  past.innerHTML = '';
-  const sessions = (S.sessions||[]).slice().reverse();
-  if (!sessions.length) { past.innerHTML = '<p class="muted">No archived sessions yet.</p>'; return; }
-  sessions.forEach(sess => {
-    const d = new Date(sess.date);
-    const totals = {};
-    sess.teams.forEach(t => totals[t]=0);
-    Object.values(sess.rounds).forEach(rd => Object.entries(rd).forEach(([t,s])=>{ if(totals[t]!==undefined) totals[t]+=s; }));
-    const sorted = sess.teams.slice().sort((a,b)=>totals[b]-totals[a]);
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `<p class="section-title" style="margin-bottom:8px;">${sess.name} — ${d.toLocaleDateString()}</p>`
-      + sorted.map((t,i) => `<div class="log-entry"><span>${i+1}. ${t}</span><span class="log-pts">${totals[t]}</span></div>`).join('');
+  document.getElementById('log-meta').textContent = S.gameName||'';
+  var past=document.getElementById('past-sessions'); past.innerHTML='';
+  var sessions=(S.sessions||[]).slice().reverse();
+  if (!sessions.length) { past.innerHTML='<p class="muted">No archived sessions yet.</p>'; return; }
+  sessions.forEach(function(sess) {
+    var d=new Date(sess.date); var st={};
+    sess.teams.forEach(function(t){st[t]=0;});
+    Object.values(sess.rounds).forEach(function(rd){Object.entries(rd).forEach(function(e){if(st[e[0]]!==undefined)st[e[0]]+=e[1];});});
+    var ss=sess.teams.slice().sort(function(a,b){return st[b]-st[a];});
+    var card=el('div','card');
+    var lbl=el('p','section-label',sess.name+' - '+d.toLocaleDateString()); lbl.style.marginBottom='8px'; card.appendChild(lbl);
+    ss.forEach(function(t,i){
+      var row=el('div','log-entry');
+      row.appendChild(el('span',null,(i+1)+'. '+t)); row.appendChild(el('span','log-pts',String(st[t])));
+      card.appendChild(row);
+    });
     past.appendChild(card);
   });
 }
 function exportCSV() {
-  const nums = Object.keys(S.rounds).map(Number).sort((a,b)=>a-b);
-  const totals = getTotals();
-  let csv = 'Team,' + nums.map(r=>'Round '+r).join(',') + ',Total\n';
-  S.teams.forEach(t => {
-    csv += [t, ...nums.map(r => S.rounds[r][t]!==undefined ? S.rounds[r][t] : ''), totals[t]].join(',') + '\n';
+  var nums=Object.keys(S.rounds).map(Number).sort(function(a,b){return a-b;});
+  var totals=getTotals();
+  var rows=['Team,'+nums.map(function(r){return 'Round '+r;}).join(',')+',Total'];
+  S.teams.forEach(function(t){
+    rows.push([t].concat(nums.map(function(r){return S.rounds[r][t]!==undefined?S.rounds[r][t]:'';}).concat([totals[t]])).join(','));
   });
-  const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-  a.download = (S.gameName||'trivia') + '_scores.csv';
-  a.click();
+  var a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(rows.join('\n'));
+  a.download=(S.gameName||'trivia')+'_scores.csv'; a.click();
 }
-
-renderHome();
+renderHome(); updateStatus();
 </script>
 </body>
 </html>
